@@ -5625,8 +5625,15 @@ void MainWindow::guiUpdate()
           progressBar.setFormat (progBarLabel);
         }
         progressBar.setValue(isec);
+        // Set progress bar color: red when transmitting, green otherwise
+        if(m_transmitting) {
+          progressBar.setStyleSheet("QProgressBar::chunk { background-color: red; }");
+        } else {
+          progressBar.setStyleSheet("QProgressBar::chunk { background-color: green; }");
+        }
       } else {
         progressBar.setValue(0);
+        progressBar.setStyleSheet("QProgressBar::chunk { background-color: green; }");
       }
     }
 

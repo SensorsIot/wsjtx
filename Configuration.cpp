@@ -1670,7 +1670,7 @@ void Configuration::impl::read_settings ()
   FD_exchange_ = settings_->value ("Field_Day_Exchange",QString {}).toString ();
   RTTY_exchange_ = settings_->value ("RTTY_Exchange",QString {}).toString ();
   Contest_Name_ = settings_->value ("Contest_Name",QString {}).toString ();
-  swiss_my_canton_ = settings_->value ("Swiss_My_Canton",QString {"ZH"}).toString ();
+  swiss_my_canton_ = settings_->value ("Swiss_My_Canton",QString {"BL"}).toString ();
   ui_->Field_Day_Exchange->setText(FD_exchange_);
   ui_->RTTY_Exchange->setText(RTTY_exchange_);
   ui_->Contest_Name->setText(Contest_Name_);
