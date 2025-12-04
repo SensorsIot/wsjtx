@@ -47,7 +47,7 @@ jobs:
       - name: Download prebuilt Hamlib
         shell: pwsh
         run: |
-          curl -L -o hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.5.5/hamlib-mingw64-4.5.5.zip"
+          curl -L -o hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.6.5/hamlib-mingw64-4.6.5.zip"
           Expand-Archive -Path "hamlib.zip" -DestinationPath "C:\hamlib-prefix"
 
       - name: Install OmniRig
