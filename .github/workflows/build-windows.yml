@@ -125,31 +125,52 @@ jobs:
 
       - name: Restructure for flat layout
         run: |
-          echo "=== Creating flat directory structure ==="
-          mkdir -p /c/wsjtx-swiss
+          echo "=== Creating directory structure ==="
+          mkdir -p /c/wsjtx-swiss/lib
 
-          # Move bin contents to top level and rename main executable
           cd /c/wsjtx-install/bin
-          cp wsjtx.exe /c/wsjtx-swiss/wsjtx-swiss.exe
-          cp message_aggregator.exe /c/wsjtx-swiss/ || true
-          cp *.dll /c/wsjtx-swiss/
 
-          # Move Qt plugins folders
-          cp -r plugins /c/wsjtx-swiss/ || true
-          cp -r platforms /c/wsjtx-swiss/ || true
-          cp -r imageformats /c/wsjtx-swiss/ || true
-          cp -r styles /c/wsjtx-swiss/ || true
-          cp -r audio /c/wsjtx-swiss/ || true
-          cp -r mediaservice /c/wsjtx-swiss/ || true
+          # DLLs and Qt plugins in lib/ subfolder
+          cp *.dll /c/wsjtx-swiss/lib/
+          cp -r plugins /c/wsjtx-swiss/lib/ || true
+          cp -r platforms /c/wsjtx-swiss/lib/ || true
+          cp -r imageformats /c/wsjtx-swiss/lib/ || true
+          cp -r styles /c/wsjtx-swiss/lib/ || true
+          cp -r audio /c/wsjtx-swiss/lib/ || true
+          cp -r mediaservice /c/wsjtx-swiss/lib/ || true
 
-          # Move share folder (contains data files)
+          # Executables in lib/ (will be launched via batch file)
+          cp wsjtx.exe /c/wsjtx-swiss/lib/wsjtx-swiss.exe
+          cp message_aggregator.exe /c/wsjtx-swiss/lib/ || true
+
+          # Share folder (contains data files)
           cp -r /c/wsjtx-install/share /c/wsjtx-swiss/ || true
 
-          echo "=== Final structure ==="
+          # Create qt.conf in lib/ to tell Qt where plugins are
+          cat > /c/wsjtx-swiss/lib/qt.conf << 'QTCONF'
+[Paths]
+Plugins = .
+QTCONF
+
+          # Create launcher batch file at top level
+          cat > /c/wsjtx-swiss/wsjtx-swiss.cmd << 'LAUNCHER'
+@echo off
+cd /d "%~dp0lib"
+start "" "wsjtx-swiss.exe" %*
+LAUNCHER
+
+          # Create launcher for message_aggregator
+          cat > /c/wsjtx-swiss/message_aggregator.cmd << 'LAUNCHER'
+@echo off
+cd /d "%~dp0lib"
+start "" "message_aggregator.exe" %*
+LAUNCHER
+
+          echo "=== Top level (user sees this) ==="
           ls -la /c/wsjtx-swiss/
 
-          echo "=== Subfolders ==="
-          find /c/wsjtx-swiss -maxdepth 1 -type d
+          echo "=== lib/ contents ==="
+          ls -la /c/wsjtx-swiss/lib/
 
       - name: Create NSIS installer
         run: |
