@@ -65,6 +65,15 @@ jobs:
             New-Item -Path $omniRigRigsPath -ItemType Directory -Force
         }
         Copy-Item -Path "OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
+    - name: List FFTW libraries
+      run: |
+        echo "=== FFTW libraries in /mingw64/lib ==="
+        ls -la /mingw64/lib/*fftw* || echo "No fftw libs found in /mingw64/lib"
+        echo "=== FFTW libraries in /mingw64/bin ==="
+        ls -la /mingw64/bin/*fftw* || echo "No fftw libs found in /mingw64/bin"
+        echo "=== pkg-config fftw3f ==="
+        pkg-config --libs fftw3f || echo "pkg-config failed for fftw3f"
+
     - name: Configure WSJT-X
       run: |
         cd wsjtx
