@@ -213,10 +213,39 @@ This provides immediate visual feedback of the current transmit state.
 2. Build with `cmake --build . --config Release --parallel 4`
 3. Install to staging directory
 4. Bundle DLL dependencies with `windeployqt` and `ldd`
-5. Create NSIS installer with `cpack -G NSIS`
-6. Create portable ZIP
+5. Restructure for flat layout (see 7.5)
+6. Create NSIS installer with `cpack -G NSIS`
+7. Create portable ZIP
 
-### 7.4 CI/CD Pipeline (GitHub Actions)
+### 7.4 Portable Package Structure
+
+The portable distribution uses a clean directory layout:
+
+```
+wsjtx-swiss/
+├── wsjtx-swiss.cmd          <-- launcher script (user clicks this)
+├── message_aggregator.cmd   <-- launcher for helper app
+├── lib/                     <-- all binaries
+│   ├── wsjtx-swiss.exe
+│   ├── message_aggregator.exe
+│   ├── *.dll
+│   ├── qt.conf
+│   ├── platforms/
+│   ├── imageformats/
+│   ├── styles/
+│   ├── audio/
+│   └── mediaservice/
+└── share/                   <-- data files
+    └── wsjtx/
+```
+
+**Design rationale:**
+- User sees only launcher scripts and folders at top level
+- All DLLs hidden in `lib/` subfolder for clean appearance
+- Launcher scripts set working directory to `lib/` before executing
+- `qt.conf` in `lib/` tells Qt where to find plugins
+
+### 7.5 CI/CD Pipeline (GitHub Actions)
 
 **Workflow Files:**
 | File | Purpose |
