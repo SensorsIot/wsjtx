@@ -2,9 +2,9 @@ name: Build WSJT-X on Windows
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ Swiss ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ Swiss ]
   workflow_dispatch:
 
 jobs:
