@@ -16,148 +16,115 @@ jobs:
         shell: msys2 {0}
 
     steps:
-    - name: Checkout WSJT-X repository
-      uses: actions/checkout@v4
-      with:
-        path: wsjtx
+      - name: Checkout WSJT-X repository
+        uses: actions/checkout@v4
+        with:
+          path: wsjtx
 
-    - name: Setup MSYS2 and dependencies
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: true
-        install: >-
-          git
-          make
-          mingw-w64-x86_64-cmake
-          pkg-config
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-gcc-fortran
-          mingw-w64-x86_64-libusb
-          mingw-w64-x86_64-fftw
-          mingw-w64-x86_64-omp
-          mingw-w64-x86_64-qt5
-          mingw-w64-x86_64-qt5-multimedia
-          mingw-w64-x86_64-qt5-serialport
-          mingw-w64-x86_64-qt5-tools
-          mingw-w64-x86_64-boost
-          mingw-w64-x86_64-portaudio
+      - name: Setup MSYS2 and dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            git
+            make
+            mingw-w64-x86_64-cmake
+            pkg-config
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-fftw
+            mingw-w64-x86_64-omp
+            mingw-w64-x86_64-qt5
+            mingw-w64-x86_64-qt5-multimedia
+            mingw-w64-x86_64-qt5-serialport
+            mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-portaudio
 
-    - name: Download prebuilt Hamlib
-      shell: pwsh
-      run: |
-        curl -L -o hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.5.5/hamlib-mingw64-4.5.5.zip"
-        Expand-Archive -Path "hamlib.zip" -DestinationPath "C:\hamlib-prefix"
+      - name: Download prebuilt Hamlib
+        shell: pwsh
+        run: |
+          curl -L -o hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.5.5/hamlib-mingw64-4.5.5.zip"
+          Expand-Archive -Path "hamlib.zip" -DestinationPath "C:\hamlib-prefix"
 
-    - name: Install OmniRig
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri "https://www.dxatlas.com/OmniRig/Files/OmniRig.zip" -OutFile "OmniRig.zip"
-        Expand-Archive -Path "OmniRig.zip" -DestinationPath "."
-        Start-Process -FilePath "OmniRigSetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+      - name: Install OmniRig
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://www.dxatlas.com/OmniRig/Files/OmniRig.zip" -OutFile "OmniRig.zip"
+          Expand-Archive -Path "OmniRig.zip" -DestinationPath "."
+          Start-Process -FilePath "OmniRigSetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
 
-    - name: Install OmniRig INI files
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri "http://dxatlas.com/OmniRig/Files/RigIni.zip" -OutFile "RigIni.zip"
-        Expand-Archive -Path "RigIni.zip" -DestinationPath "OmniRigIni"
-        $omniRigRigsPath = "C:\Program Files (x86)\Afreet\OmniRig\Rigs"
-        if (-not (Test-Path $omniRigRigsPath)) {
-            New-Item -Path $omniRigRigsPath -ItemType Directory -Force
-        }
-        Copy-Item -Path "OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
+      - name: Install OmniRig INI files
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "http://dxatlas.com/OmniRig/Files/RigIni.zip" -OutFile "RigIni.zip"
+          Expand-Archive -Path "RigIni.zip" -DestinationPath "OmniRigIni"
+          $omniRigRigsPath = "C:\Program Files (x86)\Afreet\OmniRig\Rigs"
+          if (-not (Test-Path $omniRigRigsPath)) {
+              New-Item -Path $omniRigRigsPath -ItemType Directory -Force
+          }
+          Copy-Item -Path "OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
 
-    - name: Configure WSJT-X
-      run: |
-        cd wsjtx
-        mkdir -p build
-        cd build
-        export HAMLIB_PREFIX="/c/hamlib-prefix"
-        cmake -G "MinGW Makefiles" \
-              -D CMAKE_BUILD_TYPE=Release \
-              -D CMAKE_PREFIX_PATH="${HAMLIB_PREFIX}" \
-              -D Hamlib_INCLUDE_DIR="${HAMLIB_PREFIX}/include" \
-              -D Hamlib_LIBRARY="${HAMLIB_PREFIX}/lib/libhamlib.dll.a" \
-              -D hamlib_STATIC=0 \
-              -D CMAKE_Fortran_FLAGS="-fallow-argument-mismatch" \
-              -DWSJT_SKIP_MANPAGES=ON \
-              -DWSJT_GENERATE_DOCS=OFF \
-              -D CMAKE_INSTALL_PREFIX="/c/wsjtx-install" \
-              ..
+      - name: Configure WSJT-X
+        run: |
+          cd wsjtx
+          mkdir -p build
+          cd build
+          export HAMLIB_PREFIX="/c/hamlib-prefix"
+          cmake -G "MinGW Makefiles" \
+                -D CMAKE_BUILD_TYPE=Release \
+                -D CMAKE_PREFIX_PATH="${HAMLIB_PREFIX}" \
+                -D Hamlib_INCLUDE_DIR="${HAMLIB_PREFIX}/include" \
+                -D Hamlib_LIBRARY="${HAMLIB_PREFIX}/lib/libhamlib.dll.a" \
+                -D hamlib_STATIC=0 \
+                -D CMAKE_Fortran_FLAGS="-fallow-argument-mismatch" \
+                -DWSJT_SKIP_MANPAGES=ON \
+                -DWSJT_GENERATE_DOCS=OFF \
+                -D CMAKE_INSTALL_PREFIX="/c/wsjtx-install" \
+                ..
 
-    - name: Build WSJT-X
-      run: |
-        cd wsjtx/build
-        cmake --build . --config Release --parallel 4
+      - name: Build WSJT-X
+        run: |
+          cd wsjtx/build
+          cmake --build . --config Release --parallel 4
 
-    - name: Install WSJT-X
-      run: |
-        cd wsjtx/build
-        cmake --build . --target install --config Release
+      - name: Install WSJT-X
+        run: |
+          cd wsjtx/build
+          cmake --build . --target install --config Release
 
-    - name: Bundle runtime dependencies
-      run: |
-        cd /c/wsjtx-install/bin
+      - name: Bundle runtime dependencies
+        run: |
+          cd /c/wsjtx-install/bin
 
-        # Deploy Qt dependencies (skip ANGLE/OpenGL which may not exist)
-        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle wsjtx.exe || true
-        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle message_aggregator.exe || true
+          echo "=== Running windeployqt ==="
+          # Deploy Qt dependencies (skip ANGLE/OpenGL which may not exist)
+          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle wsjtx.exe || true
+          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle message_aggregator.exe || true
 
-        # Copy MinGW runtime DLLs
-        cp /mingw64/bin/libgcc_s_seh-1.dll .
-        cp /mingw64/bin/libstdc++-6.dll .
-        cp /mingw64/bin/libwinpthread-1.dll .
-        cp /mingw64/bin/libgomp-1.dll .
-        cp /mingw64/bin/libgfortran-5.dll .
-        cp /mingw64/bin/libquadmath-0.dll .
+          echo "=== Resolving MinGW DLL dependencies with ldd ==="
+          for exe in wsjtx.exe message_aggregator.exe; do
+            echo "--- Dependencies for $exe ---"
+            # ldd output lines like: "libxxx.dll => /mingw64/bin/libxxx.dll (0x000000...)"
+            ldd "$exe" | awk '/mingw64/ {print $3}' | sort -u | while read dll; do
+              if [ -f "$dll" ]; then
+                echo "Copying $dll"
+                cp "$dll" .
+              fi
+            done
+          done
 
-        # Copy FFTW DLLs
-        cp /mingw64/bin/libfftw3f-3.dll .
-        cp /mingw64/bin/libfftw3-3.dll . || true
+          echo "=== Copying Hamlib DLLs ==="
+          cp /c/hamlib-prefix/bin/*.dll . || true
 
-        # Copy Hamlib DLLs
-        cp /c/hamlib-prefix/bin/*.dll .
+          echo "=== Final DLL count in bin ==="
+          ls -la *.dll | wc -l
 
-        # Copy Boost DLLs
-        cp /mingw64/bin/libboost_log-mt.dll . || true
-        cp /mingw64/bin/libboost_log_setup-mt.dll . || true
-        cp /mingw64/bin/libboost_filesystem-mt.dll . || true
-        cp /mingw64/bin/libboost_thread-mt.dll . || true
-        cp /mingw64/bin/libboost_chrono-mt.dll . || true
-        cp /mingw64/bin/libboost_atomic-mt.dll . || true
-
-        # Copy PortAudio
-        cp /mingw64/bin/libportaudio.dll . || true
-
-        # Copy libusb
-        cp /mingw64/bin/libusb-1.0.dll . || true
-
-        # Copy other common dependencies
-        cp /mingw64/bin/zlib1.dll . || true
-        cp /mingw64/bin/libbz2-1.dll . || true
-        cp /mingw64/bin/libdouble-conversion.dll . || true
-        cp /mingw64/bin/libicuin*.dll . || true
-        cp /mingw64/bin/libicuuc*.dll . || true
-        cp /mingw64/bin/libicudt*.dll . || true
-        cp /mingw64/bin/libpcre2-16-0.dll . || true
-        cp /mingw64/bin/libharfbuzz-0.dll . || true
-        cp /mingw64/bin/libpng16-16.dll . || true
-        cp /mingw64/bin/libfreetype-6.dll . || true
-        cp /mingw64/bin/libbrotlidec.dll . || true
-        cp /mingw64/bin/libbrotlicommon.dll . || true
-        cp /mingw64/bin/libglib-2.0-0.dll . || true
-        cp /mingw64/bin/libintl-8.dll . || true
-        cp /mingw64/bin/libiconv-2.dll . || true
-        cp /mingw64/bin/libgraphite2.dll . || true
-        cp /mingw64/bin/libmd4c.dll . || true
-
-        echo "=== Bundled DLLs ==="
-        ls -la *.dll | wc -l
-        echo "DLLs copied successfully"
-
-    - name: Upload WSJT-X artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: wsjtx-windows-build
-        path: C:\wsjtx-install\
-        retention-days: 5
+      - name: Upload WSJT-X artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wsjtx-windows-build
+          path: C:\wsjtx-install\
+          retention-days: 5
