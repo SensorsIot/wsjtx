@@ -11,61 +11,50 @@ jobs:
   build:
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     steps:
     - name: Checkout WSJT-X repository
       uses: actions/checkout@v4
       with:
         path: wsjtx
 
-    - name: Install Qt 5.15.2 with MinGW 8.1
-      uses: jurplel/install-qt-action@v4
+    - name: Setup MSYS2 and dependencies
+      uses: msys2/setup-msys2@v2
       with:
-        version: '5.15.2'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_mingw81'
-        tools: 'tools_mingw,qt.tools.win64_mingw810'
-        cache: true
-
-    - name: Download and setup FFTW
-      shell: pwsh
-      run: |
-        curl -L -o fftw.zip "https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip"
-        Expand-Archive -Path fftw.zip -DestinationPath C:\fftw
-        # Create import library for MinGW
-        cd C:\fftw
-        & "$env:IQTA_TOOLS\mingw810_64\bin\dlltool.exe" -d libfftw3f-3.def -l libfftw3f-3.dll.a -D libfftw3f-3.dll
-        & "$env:IQTA_TOOLS\mingw810_64\bin\dlltool.exe" -d libfftw3-3.def -l libfftw3-3.dll.a -D libfftw3-3.dll
-
-    - name: Download and setup libusb
-      shell: pwsh
-      run: |
-        curl -L -o libusb.7z "https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27.7z"
-        7z x libusb.7z -oC:\libusb
-
+        msystem: MINGW64
+        update: true
+        install: >-
+          git
+          make
+          mingw-w64-x86_64-cmake
+          pkg-config
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-gcc-fortran
+          mingw-w64-x86_64-libusb
+          mingw-w64-x86_64-fftw
+          mingw-w64-x86_64-omp
+          mingw-w64-x86_64-qt5
+          mingw-w64-x86_64-qt5-multimedia
+          mingw-w64-x86_64-qt5-serialport
+          mingw-w64-x86_64-qt5-tools
+          mingw-w64-x86_64-boost
+          mingw-w64-x86_64-portaudio
     - name: Download prebuilt Hamlib
       shell: pwsh
       run: |
+        # Download from our own GitHub release
         curl -L -o hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.5.5/hamlib-mingw64-4.5.5.zip"
-        Expand-Archive -Path hamlib.zip -DestinationPath C:\hamlib
-
-    - name: Download and setup Boost
-      shell: pwsh
-      run: |
-        # Download prebuilt Boost for MinGW
-        curl -L -o boost.7z "https://archives.boost.io/release/1.84.0/source/boost_1_84_0.7z"
-        7z x boost.7z -oC:\boost_src
-        # For header-only usage, we just need the headers
-        mkdir C:\boost
-        xcopy C:\boost_src\boost_1_84_0\boost C:\boost\include\boost /E /I /Y
-
+        Expand-Archive -Path "hamlib.zip" -DestinationPath "C:\hamlib-prefix"
+        Get-ChildItem -Path "C:\hamlib-prefix" -Recurse | Select-Object FullName
     - name: Install OmniRig
       shell: pwsh
       run: |
         Invoke-WebRequest -Uri "https://www.dxatlas.com/OmniRig/Files/OmniRig.zip" -OutFile "OmniRig.zip"
         Expand-Archive -Path "OmniRig.zip" -DestinationPath "."
         Start-Process -FilePath "OmniRigSetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
-        
     - name: Install OmniRig INI files
       shell: pwsh
       run: |
@@ -76,57 +65,35 @@ jobs:
             New-Item -Path $omniRigRigsPath -ItemType Directory -Force
         }
         Copy-Item -Path "OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
-
-    - name: Show toolchain versions
-      shell: cmd
-      run: |
-        echo === GCC Version ===
-        "%IQTA_TOOLS%\mingw810_64\bin\gcc.exe" --version
-        echo === GFortran Version ===
-        "%IQTA_TOOLS%\mingw810_64\bin\gfortran.exe" --version
-
     - name: Configure WSJT-X
-      shell: cmd
       run: |
-        set PATH=%IQTA_TOOLS%\mingw810_64\bin;%Qt5_DIR%\bin;%PATH%
         cd wsjtx
-        mkdir build
+        mkdir -p build
         cd build
-        cmake -G "MinGW Makefiles" ^
-              -DCMAKE_BUILD_TYPE=Release ^
-              -DCMAKE_PREFIX_PATH="%Qt5_DIR%;C:\hamlib;C:\fftw;C:\libusb;C:\boost" ^
-              -DHamlib_INCLUDE_DIR="C:\hamlib\include" ^
-              -DHamlib_LIBRARY="C:\hamlib\lib\libhamlib.dll.a" ^
-              -Dhamlib_STATIC=0 ^
-              -DFFTW3_INCLUDE_DIR="C:\fftw" ^
-              -DFFTW3F_LIBRARY="C:\fftw\libfftw3f-3.dll.a" ^
-              -DLIBUSB_INCLUDE_DIR="C:\libusb\include\libusb-1.0" ^
-              -DLIBUSB_LIBRARY="C:\libusb\MinGW64\dll\libusb-1.0.dll.a" ^
-              -DBOOST_ROOT="C:\boost" ^
-              -DWSJT_SKIP_MANPAGES=ON ^
-              -DWSJT_GENERATE_DOCS=OFF ^
-              -DCMAKE_INSTALL_PREFIX="C:\wsjtx-install" ^
+        export HAMLIB_PREFIX="/c/hamlib-prefix"
+        cmake -G "MinGW Makefiles" \
+              -D CMAKE_BUILD_TYPE=Release \
+              -D CMAKE_PREFIX_PATH="${HAMLIB_PREFIX}" \
+              -D Hamlib_INCLUDE_DIR="${HAMLIB_PREFIX}/include" \
+              -D Hamlib_LIBRARY="${HAMLIB_PREFIX}/lib/libhamlib.dll.a" \
+              -D hamlib_STATIC=0 \
+              -D CMAKE_Fortran_FLAGS="-fallow-argument-mismatch" \
+              -DWSJT_SKIP_MANPAGES=ON \
+              -DWSJT_GENERATE_DOCS=OFF \
+              -D CMAKE_INSTALL_PREFIX="/c/wsjtx-install" \
               ..
-
     - name: Build WSJT-X
-      shell: cmd
       run: |
-        set PATH=%IQTA_TOOLS%\mingw810_64\bin;%Qt5_DIR%\bin;%PATH%
-        cd wsjtx\build
+        cd wsjtx/build
         cmake --build . --config Release
-
     - name: Install WSJT-X
-      shell: cmd
       run: |
-        set PATH=%IQTA_TOOLS%\mingw810_64\bin;%Qt5_DIR%\bin;%PATH%
-        cd wsjtx\build
+        cd wsjtx/build
         cmake --build . --target install --config Release
-
     - name: Zip WSJT-X build
       shell: pwsh
       run: |
         Compress-Archive -Path C:\wsjtx-install\* -DestinationPath C:\wsjtx-windows-build.zip
-
     - name: Upload WSJT-X artifact
       uses: actions/upload-artifact@v4
       with:
