@@ -100,8 +100,8 @@ jobs:
         cd /c/wsjtx-install/bin
 
         # Deploy Qt dependencies
-        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw wsjtx.exe
-        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw message_aggregator.exe || true
+        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle wsjtx.exe || true
+        windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle message_aggregator.exe || true
 
         # Copy MinGW runtime DLLs
         cp /mingw64/bin/libgcc_s_seh-1.dll .
