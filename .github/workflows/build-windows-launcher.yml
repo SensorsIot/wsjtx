@@ -1,0 +1,250 @@
+name: Build WSJT-X with Launcher Installer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout WSJT-X repository
+        uses: actions/checkout@v4
+        with:
+          path: wsjtx
+
+      - name: Setup MSYS2 and dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          cache: true
+          install: >-
+            git
+            make
+            mingw-w64-x86_64-cmake
+            pkg-config
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-fftw
+            mingw-w64-x86_64-omp
+            mingw-w64-x86_64-qt5
+            mingw-w64-x86_64-qt5-multimedia
+            mingw-w64-x86_64-qt5-serialport
+            mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-portaudio
+            mingw-w64-x86_64-nsis
+
+      - name: Download Hamlib and OmniRig
+        shell: pwsh
+        run: |
+          # Download files sequentially (parallel jobs unreliable in CI)
+          curl -L -o C:\hamlib.zip "https://github.com/SensorsIot/wsjtx/releases/download/hamlib-4.6.5/hamlib-mingw64-4.6.5.zip"
+          Invoke-WebRequest -Uri "https://www.dxatlas.com/OmniRig/Files/OmniRig.zip" -OutFile "C:\OmniRig.zip"
+          Invoke-WebRequest -Uri "http://dxatlas.com/OmniRig/Files/RigIni.zip" -OutFile "C:\RigIni.zip"
+
+          # Extract Hamlib
+          Expand-Archive -Path "C:\hamlib.zip" -DestinationPath "C:\hamlib-prefix"
+
+          # Install OmniRig
+          Expand-Archive -Path "C:\OmniRig.zip" -DestinationPath "C:\OmniRig"
+          Start-Process -FilePath "C:\OmniRig\OmniRigSetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+
+          # Install OmniRig INI files
+          Expand-Archive -Path "C:\RigIni.zip" -DestinationPath "C:\OmniRigIni"
+          $omniRigRigsPath = "C:\Program Files (x86)\Afreet\OmniRig\Rigs"
+          if (-not (Test-Path $omniRigRigsPath)) {
+              New-Item -Path $omniRigRigsPath -ItemType Directory -Force
+          }
+          Copy-Item -Path "C:\OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
+
+      - name: Configure WSJT-X
+        run: |
+          cd wsjtx
+          mkdir -p build
+          cd build
+          export HAMLIB_PREFIX="/c/hamlib-prefix"
+          cmake -G "MinGW Makefiles" \
+                -D CMAKE_BUILD_TYPE=Release \
+                -D CMAKE_PREFIX_PATH="${HAMLIB_PREFIX}" \
+                -D Hamlib_INCLUDE_DIR="${HAMLIB_PREFIX}/include" \
+                -D Hamlib_LIBRARY="${HAMLIB_PREFIX}/lib/libhamlib.dll.a" \
+                -D hamlib_STATIC=0 \
+                -D CMAKE_Fortran_FLAGS="-fallow-argument-mismatch" \
+                -DWSJT_SKIP_MANPAGES=ON \
+                -DWSJT_GENERATE_DOCS=OFF \
+                -D CMAKE_INSTALL_PREFIX="/c/wsjtx-install" \
+                ..
+
+      - name: Build WSJT-X
+        run: |
+          cd wsjtx/build
+          cmake --build . --config Release --parallel 4
+
+      - name: Install WSJT-X
+        run: |
+          cd wsjtx/build
+          cmake --build . --target install --config Release
+
+      - name: Bundle runtime dependencies
+        run: |
+          cd /c/wsjtx-install/bin
+
+          echo "=== Running windeployqt ==="
+          # Deploy Qt dependencies (skip ANGLE/OpenGL which may not exist)
+          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle wsjtx.exe || true
+          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle message_aggregator.exe || true
+
+          echo "=== Resolving MinGW DLL dependencies with ldd ==="
+          for exe in wsjtx.exe message_aggregator.exe; do
+            echo "--- Dependencies for $exe ---"
+            # ldd output lines like: "libxxx.dll => /mingw64/bin/libxxx.dll (0x000000...)"
+            ldd "$exe" | awk '/mingw64/ {print $3}' | sort -u | while read dll; do
+              if [ -f "$dll" ]; then
+                echo "Copying $dll"
+                cp "$dll" .
+              fi
+            done
+          done
+
+          echo "=== Copying Hamlib DLLs ==="
+          cp /c/hamlib-prefix/bin/*.dll . || true
+
+          echo "=== Final DLL count in bin ==="
+          ls -la *.dll | wc -l
+
+      - name: Build launcher
+        run: |
+          echo "=== Building launcher ==="
+          cd $GITHUB_WORKSPACE/wsjtx/launcher
+          gcc -mwindows -O2 -o wsjtx-swiss.exe wsjtx-swiss-launcher.c
+          ls -la wsjtx-swiss.exe
+
+      - name: Create launcher directory structure
+        run: |
+          echo "=== Creating directory structure for NSIS ==="
+          mkdir -p /c/wsjtx-launcher/lib
+
+          cd /c/wsjtx-install/bin
+
+          # DLLs and Qt plugins in lib/ subfolder
+          cp *.dll /c/wsjtx-launcher/lib/
+          cp -r plugins /c/wsjtx-launcher/lib/ || true
+          cp -r platforms /c/wsjtx-launcher/lib/ || true
+          cp -r imageformats /c/wsjtx-launcher/lib/ || true
+          cp -r styles /c/wsjtx-launcher/lib/ || true
+          cp -r audio /c/wsjtx-launcher/lib/ || true
+          cp -r mediaservice /c/wsjtx-launcher/lib/ || true
+
+          # Main executables in lib/
+          cp wsjtx.exe /c/wsjtx-launcher/lib/
+          cp message_aggregator.exe /c/wsjtx-launcher/lib/ || true
+
+          # Share folder (contains data files)
+          cp -r /c/wsjtx-install/share /c/wsjtx-launcher/ || true
+
+          # Create qt.conf in lib/ to tell Qt where plugins are
+          echo '[Paths]' > /c/wsjtx-launcher/lib/qt.conf
+          echo 'Plugins = .' >> /c/wsjtx-launcher/lib/qt.conf
+
+          # Copy launcher to top level
+          cp $GITHUB_WORKSPACE/wsjtx/launcher/wsjtx-swiss.exe /c/wsjtx-launcher/
+
+          echo "=== Top level (user sees this) ==="
+          ls -la /c/wsjtx-launcher/
+
+          echo "=== lib/ contents ==="
+          ls -la /c/wsjtx-launcher/lib/
+
+      - name: Create custom NSIS installer
+        shell: pwsh
+        run: |
+          # Create NSIS script for launcher structure
+          $nsisScript = @'
+          !include "MUI2.nsh"
+
+          Name "WSJT-SWISS"
+          OutFile "wsjtx-swiss-launcher-installer.exe"
+          InstallDir "C:\WSJT\wsjtx-swiss"
+          RequestExecutionLevel admin
+
+          !define MUI_ICON "$%GITHUB_WORKSPACE%\wsjtx\icons\windows-icons\wsjtx.ico"
+          !define MUI_UNICON "$%GITHUB_WORKSPACE%\wsjtx\icons\windows-icons\wsjtx.ico"
+
+          !insertmacro MUI_PAGE_WELCOME
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_PAGE_FINISH
+
+          !insertmacro MUI_UNPAGE_CONFIRM
+          !insertmacro MUI_UNPAGE_INSTFILES
+
+          !insertmacro MUI_LANGUAGE "English"
+
+          Section "Install"
+            SetOutPath "$INSTDIR"
+
+            ; Copy launcher to top level
+            File "C:\wsjtx-launcher\wsjtx-swiss.exe"
+
+            ; Copy lib folder
+            SetOutPath "$INSTDIR\lib"
+            File /r "C:\wsjtx-launcher\lib\*.*"
+
+            ; Copy share folder
+            SetOutPath "$INSTDIR\share"
+            File /r "C:\wsjtx-launcher\share\*.*"
+
+            ; Create Start Menu shortcuts
+            CreateDirectory "$SMPROGRAMS\WSJT-SWISS"
+            CreateShortcut "$SMPROGRAMS\WSJT-SWISS\WSJT-SWISS.lnk" "$INSTDIR\wsjtx-swiss.exe"
+            CreateShortcut "$SMPROGRAMS\WSJT-SWISS\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+
+            ; Create Desktop shortcut
+            CreateShortcut "$DESKTOP\WSJT-SWISS.lnk" "$INSTDIR\wsjtx-swiss.exe"
+
+            ; Create uninstaller
+            WriteUninstaller "$INSTDIR\Uninstall.exe"
+
+            ; Add to Add/Remove Programs
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WSJT-SWISS" "DisplayName" "WSJT-SWISS"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WSJT-SWISS" "UninstallString" "$INSTDIR\Uninstall.exe"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WSJT-SWISS" "InstallLocation" "$INSTDIR"
+          SectionEnd
+
+          Section "Uninstall"
+            ; Remove files
+            RMDir /r "$INSTDIR\lib"
+            RMDir /r "$INSTDIR\share"
+            Delete "$INSTDIR\wsjtx-swiss.exe"
+            Delete "$INSTDIR\Uninstall.exe"
+            RMDir "$INSTDIR"
+
+            ; Remove shortcuts
+            Delete "$SMPROGRAMS\WSJT-SWISS\WSJT-SWISS.lnk"
+            Delete "$SMPROGRAMS\WSJT-SWISS\Uninstall.lnk"
+            RMDir "$SMPROGRAMS\WSJT-SWISS"
+            Delete "$DESKTOP\WSJT-SWISS.lnk"
+
+            ; Remove registry
+            DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WSJT-SWISS"
+          SectionEnd
+          '@
+
+          $nsisScript | Out-File -FilePath "C:\installer.nsi" -Encoding ASCII
+
+          # Run NSIS
+          & "C:\msys64\mingw64\bin\makensis.exe" "C:\installer.nsi"
+
+      - name: Upload launcher installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: wsjtx-swiss-launcher-installer
+          path: C:\wsjtx-swiss-launcher-installer.exe
+          retention-days: 30
