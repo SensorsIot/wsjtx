@@ -124,7 +124,7 @@ jobs:
       - name: Build launcher
         run: |
           echo "=== Building launcher ==="
-          cd wsjtx/launcher
+          cd $GITHUB_WORKSPACE/wsjtx/launcher
           gcc -mwindows -O2 -o wsjtx-swiss.exe wsjtx-swiss-launcher.c
           ls -la wsjtx-swiss.exe
 
