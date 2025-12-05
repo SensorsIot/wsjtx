@@ -163,19 +163,15 @@ jobs:
           ls -la /c/wsjtx-launcher/lib/
 
       - name: Create custom NSIS installer
-        shell: pwsh
         run: |
           # Create NSIS script for launcher structure
-          $nsisScript = @'
+          cat > /c/installer.nsi << 'NSIS_EOF'
           !include "MUI2.nsh"
 
           Name "WSJT-SWISS"
-          OutFile "wsjtx-swiss-launcher-installer.exe"
+          OutFile "C:\wsjtx-swiss-launcher-installer.exe"
           InstallDir "C:\WSJT\wsjtx-swiss"
           RequestExecutionLevel admin
-
-          !define MUI_ICON "$%GITHUB_WORKSPACE%\wsjtx\icons\windows-icons\wsjtx.ico"
-          !define MUI_UNICON "$%GITHUB_WORKSPACE%\wsjtx\icons\windows-icons\wsjtx.ico"
 
           !insertmacro MUI_PAGE_WELCOME
           !insertmacro MUI_PAGE_DIRECTORY
@@ -235,12 +231,10 @@ jobs:
             ; Remove registry
             DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WSJT-SWISS"
           SectionEnd
-          '@
+          NSIS_EOF
 
-          $nsisScript | Out-File -FilePath "C:\installer.nsi" -Encoding ASCII
-
-          # Run NSIS
-          & "C:\msys64\mingw64\bin\makensis.exe" "C:\installer.nsi"
+          # Run NSIS (available via MSYS2)
+          makensis /c/installer.nsi
 
       - name: Upload launcher installer
         uses: actions/upload-artifact@v4
