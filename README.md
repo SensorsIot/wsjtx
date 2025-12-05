@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/SensorsIot/wsjtx/actions/workflows/build-windows.yml/badge.svg?branch=Swiss)](https://github.com/SensorsIot/wsjtx/actions/workflows/build-windows.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows)](https://github.com/SensorsIot/wsjtx/releases)
-[![WSJT-X](https://img.shields.io/badge/Based%20on-WSJT--X%202.6.1-green)](https://wsjt.sourceforge.io/wsjtx.html)
+[![WSJT-X](https://img.shields.io/badge/Based%20on-WSJT--X%202.7.0-green)](https://wsjt.sourceforge.io/wsjtx.html)
 
 A fork of [WSJT-X](https://wsjt.sourceforge.io/wsjtx.html) with **Swiss FT8 Contest** support for exchanging canton codes.
 
