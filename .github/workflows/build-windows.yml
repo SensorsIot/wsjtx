@@ -126,42 +126,6 @@ jobs:
           gcc -mwindows -O2 -o wsjtx-swiss.exe wsjtx-swiss-launcher.c
           ls -la wsjtx-swiss.exe
 
-      - name: Create portable package
-        run: |
-          echo "=== Creating directory structure ==="
-          mkdir -p /c/wsjtx-swiss/lib
-
-          cd /c/wsjtx-install/bin
-
-          # DLLs and Qt plugins in lib/ subfolder
-          cp *.dll /c/wsjtx-swiss/lib/
-          cp -r plugins /c/wsjtx-swiss/lib/ || true
-          cp -r platforms /c/wsjtx-swiss/lib/ || true
-          cp -r imageformats /c/wsjtx-swiss/lib/ || true
-          cp -r styles /c/wsjtx-swiss/lib/ || true
-          cp -r audio /c/wsjtx-swiss/lib/ || true
-          cp -r mediaservice /c/wsjtx-swiss/lib/ || true
-
-          # Main executables in lib/
-          cp wsjtx.exe /c/wsjtx-swiss/lib/
-          cp message_aggregator.exe /c/wsjtx-swiss/lib/ || true
-
-          # Share folder (contains data files)
-          cp -r /c/wsjtx-install/share /c/wsjtx-swiss/ || true
-
-          # Create qt.conf in lib/ to tell Qt where plugins are
-          echo '[Paths]' > /c/wsjtx-swiss/lib/qt.conf
-          echo 'Plugins = .' >> /c/wsjtx-swiss/lib/qt.conf
-
-          # Copy launcher to top level
-          cp $GITHUB_WORKSPACE/wsjtx/launcher/wsjtx-swiss.exe /c/wsjtx-swiss/
-
-          echo "=== Top level (user sees this) ==="
-          ls -la /c/wsjtx-swiss/
-
-          echo "=== lib/ contents ==="
-          ls -la /c/wsjtx-swiss/lib/
-
       - name: Create NSIS installer
         run: |
           cd wsjtx/build
@@ -172,18 +136,6 @@ jobs:
         with:
           name: wsjtx-swiss-installer
           path: wsjtx/build/wsjtx-*.exe
-          retention-days: 30
-
-      - name: Upload portable zip
-        shell: pwsh
-        run: |
-          Compress-Archive -Path C:\wsjtx-swiss\* -DestinationPath C:\wsjtx-swiss-portable.zip
-
-      - name: Upload portable artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wsjtx-swiss-portable
-          path: C:\wsjtx-swiss-portable.zip
           retention-days: 30
 
       - name: Upload to Release
@@ -201,8 +153,6 @@ jobs:
             if ($installer) {
               gh release upload ${{ github.ref_name }} $installer.FullName --clobber
             }
-            # Upload portable zip
-            gh release upload ${{ github.ref_name }} C:\wsjtx-swiss-portable.zip --clobber
           } else {
             Write-Host "No release exists for ${{ github.ref_name }} - skipping upload (artifacts still available)"
           }
