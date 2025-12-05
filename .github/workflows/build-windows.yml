@@ -156,7 +156,7 @@ jobs:
           echo 'Plugins = .' >> /c/wsjtx-swiss/lib/qt.conf
 
           # Copy launcher to top level
-          cp /d/a/wsjtx/wsjtx/launcher/wsjtx-swiss.exe /c/wsjtx-swiss/
+          cp $GITHUB_WORKSPACE/wsjtx/launcher/wsjtx-swiss.exe /c/wsjtx-swiss/
 
           echo "=== Top level (user sees this) ==="
           ls -la /c/wsjtx-swiss/
