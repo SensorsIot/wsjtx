@@ -3,6 +3,7 @@ name: Build WSJT-X on Windows
 on:
   push:
     branches: [ Swiss ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ Swiss ]
   workflow_dispatch:
@@ -189,3 +190,17 @@ jobs:
           name: wsjtx-swiss-portable
           path: C:\wsjtx-swiss-portable.zip
           retention-days: 30
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Find the installer exe
+          $installer = Get-ChildItem -Path wsjtx/build -Filter "wsjtx-*.exe" | Select-Object -First 1
+          if ($installer) {
+            gh release upload ${{ github.ref_name }} $installer.FullName --clobber
+          }
+          # Upload portable zip
+          gh release upload ${{ github.ref_name }} C:\wsjtx-swiss-portable.zip --clobber
