@@ -195,6 +195,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd wsjtx
+          # Create release if it doesn't exist
+          gh release create ${{ github.ref_name }} --title "WSJT-SWISS ${{ github.ref_name }}" --notes "Swiss FT8 Contest release" 2>$null || echo "Release exists"
           # Find the installer exe
           $installer = Get-ChildItem -Path build -Filter "wsjtx-*.exe" | Select-Object -First 1
           if ($installer) {
