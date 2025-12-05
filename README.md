@@ -1,6 +1,6 @@
 # WSJT-SWISS
 
-[![Build Status](https://github.com/SensorsIot/wsjtx/actions/workflows/build-windows.yml/badge.svg)](https://github.com/SensorsIot/wsjtx/actions/workflows/build-windows.yml)
+[![GitHub Actions](https://img.shields.io/badge/Built%20with-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/SensorsIot/wsjtx/actions)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows)](https://github.com/SensorsIot/wsjtx/releases)
 [![WSJT-X](https://img.shields.io/badge/Based%20on-WSJT--X%202.7.0-green)](https://wsjt.sourceforge.io/wsjtx.html)
@@ -93,8 +93,11 @@ Some antivirus programs may flag the installer as suspicious. This is a false po
 4. Under **Special Operating Activity**, select **Swiss FT8 Contest**
 5. Choose your canton from the dropdown menu (default: BL)
 6. Click **OK** to save
+7. Add XMAS in the "Contest name"
+   
+![Setup Screenshot](doc/images/setup-screenshot.png)
 
-Your TX messages will now automatically include your canton code during contest operation.
+Your TX messages will now automatically include your canton code during contest operation and you CQ "XMAS".
 
 ---
 
@@ -117,6 +120,8 @@ Your TX messages will now automatically include your canton code during contest 
 | 4 | Station B sends canton code |
 | 5 | Station A sends canton code |
 | 6 | Station B confirms with RR73 |
+
+![Operation Screenshot](doc/images/operation-screenshot.png)
 
 ### Logging
 
@@ -162,10 +167,6 @@ WSJT-SWISS uses **GitHub Actions** for automated builds. GitHub Actions is a CI/
 4. Download `wsjtx-swiss-installer` or `wsjtx-swiss-portable`
 
 Artifacts are retained for 30 days.
-
-### Local Build
-
-For local builds, you need MSYS2/MinGW64 with Qt 5.x, Hamlib 4.6.5, FFTW3, Boost, and CMake. See the [FSD documentation](doc/SWISS-FT8-WSJTX-FSD.md) for detailed build instructions.
 
 ---
 
