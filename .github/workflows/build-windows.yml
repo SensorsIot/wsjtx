@@ -121,7 +121,14 @@ jobs:
           echo "=== Final DLL count in bin ==="
           ls -la *.dll | wc -l
 
-      - name: Restructure for flat layout
+      - name: Build launcher
+        run: |
+          echo "=== Building launcher ==="
+          cd wsjtx/launcher
+          gcc -mwindows -O2 -o wsjtx-swiss.exe wsjtx-swiss-launcher.c
+          ls -la wsjtx-swiss.exe
+
+      - name: Create portable package
         run: |
           echo "=== Creating directory structure ==="
           mkdir -p /c/wsjtx-swiss/lib
@@ -137,8 +144,8 @@ jobs:
           cp -r audio /c/wsjtx-swiss/lib/ || true
           cp -r mediaservice /c/wsjtx-swiss/lib/ || true
 
-          # Executables in lib/ (will be launched via batch file)
-          cp wsjtx.exe /c/wsjtx-swiss/lib/wsjtx-swiss.exe
+          # Main executables in lib/
+          cp wsjtx.exe /c/wsjtx-swiss/lib/
           cp message_aggregator.exe /c/wsjtx-swiss/lib/ || true
 
           # Share folder (contains data files)
@@ -148,15 +155,8 @@ jobs:
           echo '[Paths]' > /c/wsjtx-swiss/lib/qt.conf
           echo 'Plugins = .' >> /c/wsjtx-swiss/lib/qt.conf
 
-          # Create launcher batch file at top level
-          echo '@echo off' > /c/wsjtx-swiss/wsjtx-swiss.cmd
-          echo 'cd /d "%~dp0lib"' >> /c/wsjtx-swiss/wsjtx-swiss.cmd
-          echo 'start "" "wsjtx-swiss.exe" %*' >> /c/wsjtx-swiss/wsjtx-swiss.cmd
-
-          # Create launcher for message_aggregator
-          echo '@echo off' > /c/wsjtx-swiss/message_aggregator.cmd
-          echo 'cd /d "%~dp0lib"' >> /c/wsjtx-swiss/message_aggregator.cmd
-          echo 'start "" "message_aggregator.exe" %*' >> /c/wsjtx-swiss/message_aggregator.cmd
+          # Copy launcher to top level
+          cp /d/a/wsjtx/wsjtx/launcher/wsjtx-swiss.exe /c/wsjtx-swiss/
 
           echo "=== Top level (user sees this) ==="
           ls -la /c/wsjtx-swiss/
