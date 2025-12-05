@@ -126,6 +126,9 @@ public:
   // this signal is emitted if the server has sent information about a callsign
   Q_SIGNAL void annotation_info (QString const& dx_call, bool sort_order_provided, quint32 sort_order);
 
+  // this signal is emitted if the server has requested to enable/disable TX
+  Q_SIGNAL void setEnableTx (bool enable);
+
     // this signal is emitted when network errors occur or if a host
   // lookup fails
   Q_SIGNAL void error (QString const&) const;

@@ -407,6 +407,18 @@ void MessageClient::impl::parse_message (QByteArray const& msg)
               }
                 break;
 
+            case NetworkMessage::SetEnableTx:
+              {
+                bool enable {false};
+                in >> enable;
+                TRACE_UDP ("SetEnableTx enable:" << enable);
+                if (check_status (in) != Fail)
+                  {
+                    Q_EMIT self_->setEnableTx (enable);
+                  }
+              }
+              break;
+
               default:
               // Ignore
               //

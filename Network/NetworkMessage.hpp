@@ -561,6 +561,7 @@ namespace NetworkMessage
       SwitchConfiguration,
       Configure,
       AnnotationInfo,
+      SetEnableTx,
       maximum_message_type_     // ONLY add new message types
                                 // immediately before here
     };
