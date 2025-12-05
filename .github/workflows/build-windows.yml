@@ -204,5 +204,6 @@ jobs:
             # Upload portable zip
             gh release upload ${{ github.ref_name }} C:\wsjtx-swiss-portable.zip --clobber
           } else {
-            echo "No release exists for ${{ github.ref_name }} - skipping upload (artifacts still available)"
+            Write-Host "No release exists for ${{ github.ref_name }} - skipping upload (artifacts still available)"
           }
+          exit 0
