@@ -170,7 +170,7 @@ jobs:
 
           Name "WSJT-SWISS"
           OutFile "C:\wsjtx-swiss-launcher-installer.exe"
-          InstallDir "C:\WSJT\wsjtx-swiss"
+          InstallDir "C:\WSJTX-SWISS"
           RequestExecutionLevel admin
 
           !insertmacro MUI_PAGE_WELCOME
