@@ -85,9 +85,19 @@ Some antivirus programs may flag the installer as suspicious. This is a false po
 
 ---
 
-## 4. Setup
+## 4. Starting WSJT-SWISS
 
-1. Launch **WSJT-SWISS** from the Start Menu or installation folder
+After installation, you can start WSJT-SWISS in several ways:
+
+- **Start Menu:** Look for **WSJT-X** in the Start Menu
+- **Desktop:** Use the desktop shortcut (if created during installation)
+- **Installation folder:** Navigate to `C:\WSJT\wsjtx\bin\wsjtx.exe`
+
+---
+
+## 5. Setup
+
+1. Launch **WSJT-SWISS** using one of the methods above
 2. Go to **File** → **Settings** (or press F2)
 3. Navigate to the **Advanced** tab
 4. Under **Special Operating Activity**, select **Swiss FT8 Contest**
@@ -101,7 +111,7 @@ Your TX messages will now automatically include your canton code during contest 
 
 ---
 
-## 5. Operation
+## 6. Operation
 
 ### Starting a QSO
 
@@ -133,7 +143,7 @@ Export your log via **File** → **Export ADIF** for contest submission.
 
 ---
 
-## 6. Compatibility
+## 7. Compatibility
 
 | Scenario | Compatibility |
 |----------|---------------|
@@ -145,17 +155,15 @@ Export your log via **File** → **Export ADIF** for contest submission.
 
 ---
 
-## 7. Building from Source
+## 8. Building from Source
 
 WSJT-SWISS uses **GitHub Actions** for automated builds. GitHub Actions is a CI/CD (Continuous Integration/Continuous Deployment) service that automatically compiles the software when triggered.
 
 ### How to Trigger a Build
 
-**Automatic:** A build starts automatically when a version tag (e.g., `v1.0.2`) is pushed to the repository.
-
 **Manual:**
 1. Go to [Actions](https://github.com/SensorsIot/wsjtx/actions)
-2. Select **"Build WSJT-X on Windows"**
+2. Select **"Build WSJT-X Windows Installer"**
 3. Click **"Run workflow"**
 4. Select the branch and click **"Run workflow"**
 
@@ -164,19 +172,19 @@ WSJT-SWISS uses **GitHub Actions** for automated builds. GitHub Actions is a CI/
 1. Go to [Actions](https://github.com/SensorsIot/wsjtx/actions)
 2. Click on a completed workflow run
 3. Scroll to **Artifacts** section
-4. Download `wsjtx-swiss-installer` or `wsjtx-swiss-portable`
+4. Download `wsjtx-swiss-installer`
 
 Artifacts are retained for 30 days.
 
 ---
 
-## 8. Hamlib Builds
+## 9. Hamlib Builds
 
 Pre-built Hamlib libraries used for compiling WSJT-SWISS are available in a separate repository: [hamlib-prebuilds](https://github.com/SensorsIot/hamlib-prebuilds). These are for developers only and not needed for regular users.
 
 ---
 
-## 9. Credits & License
+## 10. Credits & License
 
 ### Credits
 
