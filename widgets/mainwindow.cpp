@@ -6724,7 +6724,7 @@ void MainWindow::genStdMsgs(QString rpt, bool unconditional)
       if(SpecOp::ARRL_DIGI==m_specOp) sent=my_grid;
       if(SpecOp::Q65_PILEUP==m_specOp) sent=my_grid;
       if(SpecOp::FIELD_DAY==m_specOp) sent=m_config.Field_Day_Exchange();
-      if(SpecOp::SWISS_FT8_CONTEST==m_specOp) sent=m_config.swiss_my_canton();
+      if(SpecOp::SWISS_FT8_CONTEST==m_specOp) sent="1A " + m_config.swiss_my_canton();
       if(SpecOp::RTTY==m_specOp) {
         sent=rst + m_config.RTTY_Exchange();
         QString t1=m_config.RTTY_Exchange();

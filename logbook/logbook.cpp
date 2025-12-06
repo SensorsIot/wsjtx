@@ -173,10 +173,16 @@ QByteArray LogBook::QSOToADIF (QString const& hisCall, QString const& hisGrid, Q
               }
             else if (Configuration::SpecialOperatingActivity::SWISS_FT8_CONTEST == config_->special_op_id ())
               {
-                t += " <MY_CANTON:" + QString::number (xSent.size ()) + ">" + xSent;
-                if (words.size () >= 1 && words.at(0).size() == 2)
+                // Swiss FT8 Contest: xSent/xRcvd format is "1A ZH" (class + canton)
+                // Extract canton from words.at(1) for received, and from xSent for sent
+                auto sentWords = xSent.split (' ', Qt::SkipEmptyParts);
+                if (sentWords.size () >= 2 && sentWords.at(1).size() == 2)
                   {
-                    t += " <HIS_CANTON:" + QString::number (words.at(0).size ()) + ">" + words.at(0);
+                    t += " <MY_CANTON:" + QString::number (sentWords.at(1).size ()) + ">" + sentWords.at(1);
+                  }
+                if (words.size () >= 2 && words.at(1).size() == 2)
+                  {
+                    t += " <HIS_CANTON:" + QString::number (words.at(1).size ()) + ">" + words.at(1);
                   }
               }
           }
