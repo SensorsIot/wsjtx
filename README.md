@@ -151,11 +151,9 @@ WSJT-SWISS uses **GitHub Actions** for automated builds. GitHub Actions is a CI/
 
 ### How to Trigger a Build
 
-**Automatic:** A build starts automatically when a version tag (e.g., `v1.0.2`) is pushed to the repository.
-
 **Manual:**
 1. Go to [Actions](https://github.com/SensorsIot/wsjtx/actions)
-2. Select **"Build WSJT-X on Windows"**
+2. Select **"Build WSJT-X Windows Installer"**
 3. Click **"Run workflow"**
 4. Select the branch and click **"Run workflow"**
 
@@ -164,7 +162,7 @@ WSJT-SWISS uses **GitHub Actions** for automated builds. GitHub Actions is a CI/
 1. Go to [Actions](https://github.com/SensorsIot/wsjtx/actions)
 2. Click on a completed workflow run
 3. Scroll to **Artifacts** section
-4. Download `wsjtx-swiss-installer` or `wsjtx-swiss-portable`
+4. Download `wsjtx-swiss-installer`
 
 Artifacts are retained for 30 days.
 
