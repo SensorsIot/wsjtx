@@ -58,7 +58,8 @@ if (CPACK_GENERATOR MATCHES "NSIS")
   ")
 
   # Variables for import path
-  set (CPACK_NSIS_EXTRA_DEFINES "Var IMPORT_PATH$\\nVar TXT_IMPORT_PATH")
+  set (CPACK_NSIS_EXTRA_DEFINES "Var IMPORT_PATH
+Var TXT_IMPORT_PATH")
 
   # Custom install options page - import WSJT-X settings with editable path
   set (CPACK_NSIS_EXTRA_INSTALL_OPTIONS "
