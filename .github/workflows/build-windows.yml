@@ -101,6 +101,12 @@ jobs:
           # cmake install runs fixup_bundle() which copies all required DLLs
           cmake --build . --target install --config Release
 
+      - name: Save build cache
+        uses: actions/cache/save@v4
+        with:
+          path: wsjtx/build
+          key: wsjtx-build-${{ github.run_id }}
+
       - name: Create NSIS installer
         run: |
           cd wsjtx/build

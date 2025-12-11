@@ -1,0 +1,85 @@
+name: Package Only (NSIS)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout WSJT-X repository
+        uses: actions/checkout@v4
+        with:
+          path: wsjtx
+
+      - name: Disable Windows Defender
+        shell: pwsh
+        run: |
+          Set-MpPreference -DisableRealtimeMonitoring $true
+
+      - name: Setup MSYS2 and dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          cache: true
+          install: >-
+            git
+            make
+            mingw-w64-x86_64-cmake
+            pkg-config
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-fftw
+            mingw-w64-x86_64-omp
+            mingw-w64-x86_64-qt5
+            mingw-w64-x86_64-qt5-multimedia
+            mingw-w64-x86_64-qt5-serialport
+            mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-portaudio
+            mingw-w64-x86_64-nsis
+
+      - name: Restore build cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: wsjtx/build
+          key: wsjtx-build-latest
+          restore-keys: |
+            wsjtx-build-
+
+      - name: Check cache was restored
+        shell: bash
+        run: |
+          if [ ! -d "wsjtx/build" ]; then
+            echo "ERROR: No build cache found. Run a full build first."
+            exit 1
+          fi
+          echo "Build cache restored successfully"
+
+      - name: Create NSIS installer
+        run: |
+          cd wsjtx/build
+          cpack -G NSIS || (cat _CPack_Packages/win64/NSIS/NSISOutput.log && exit 1)
+
+      - name: Create ZIP archive
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "wsjtx/build/wsjtx-*.exe" | Select-Object -First 1
+          $zipName = "wsjtx-swiss-" + $installer.BaseName.Replace("wsjtx-", "") + ".zip"
+          Compress-Archive -Path $installer.FullName -DestinationPath "wsjtx/build/$zipName"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: wsjtx-swiss-installer
+          path: wsjtx/build/wsjtx-swiss-*.zip
+          compression-level: 0
+          retention-days: 30
