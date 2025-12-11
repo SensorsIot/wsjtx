@@ -78,12 +78,15 @@ jobs:
           }
           Copy-Item -Path "C:\OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
 
-      - name: Cache build directory
+      - name: Restore build cache
         if: ${{ !inputs.package_only }}
-        uses: actions/cache@v4
+        id: cache-build
+        uses: actions/cache/restore@v4
         with:
           path: wsjtx/build
           key: wsjtx-build-${{ github.sha }}
+          restore-keys: |
+            wsjtx-build-
 
       - name: Restore build from cache
         if: ${{ inputs.package_only }}
@@ -133,6 +136,13 @@ jobs:
           cd wsjtx/build
           # cmake install runs fixup_bundle() which copies all required DLLs
           cmake --build . --target install --config Release
+
+      - name: Save build cache
+        if: ${{ !inputs.package_only && steps.cache-build.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: wsjtx/build
+          key: wsjtx-build-${{ github.sha }}
 
       - name: Create NSIS installer
         run: |
