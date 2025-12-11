@@ -104,7 +104,7 @@ jobs:
       - name: Create NSIS installer
         run: |
           cd wsjtx/build
-          cpack -G NSIS
+          cpack -G NSIS || (cat _CPack_Packages/win64/NSIS/NSISOutput.log && exit 1)
 
       - name: Create ZIP archive
         shell: pwsh
