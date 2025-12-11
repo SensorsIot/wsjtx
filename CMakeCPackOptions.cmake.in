@@ -43,6 +43,11 @@ if (CPACK_GENERATOR MATCHES "NSIS")
   set (CPACK_NSIS_MUI_FINISHPAGE_RUN "wsjtx.exe")
   set (CPACK_NSIS_MODIFY_PATH ON)
 
+  # Extra uninstall commands to clean up old files
+  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+    Delete \\\"$INSTDIR\\\\bin\\\\libhamlib-4_old.dll\\\"
+  ")
+
   # Setup the installer and uninstall VersionInfo resource
   set (CPACK_NSIS_EXTRA_DEFINES
     "VIProductVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
