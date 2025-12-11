@@ -1,5 +1,7 @@
 name: Build WSJT-X Windows Installer
 
+run-name: "Build WSJT-X Windows Installer (${{ inputs.cpack_version || 'production' }})"
+
 on:
   push:
     tags:
