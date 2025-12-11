@@ -60,23 +60,19 @@ jobs:
             mingw-w64-x86_64-portaudio
             mingw-w64-x86_64-nsis
 
-      - name: Download Hamlib and OmniRig
+      - name: Download Hamlib and install OmniRig
         shell: pwsh
         run: |
-          # Download files sequentially (parallel jobs unreliable in CI)
+          # Download Hamlib from GitHub
           curl -L -o C:\hamlib.zip "https://github.com/SensorsIot/hamlib-prebuilds/releases/download/hamlib-4.6.5/hamlib-mingw64-4.6.5.zip"
-          Invoke-WebRequest -Uri "https://www.dxatlas.com/OmniRig/Files/OmniRig.zip" -OutFile "C:\OmniRig.zip"
-          Invoke-WebRequest -Uri "http://dxatlas.com/OmniRig/Files/RigIni.zip" -OutFile "C:\RigIni.zip"
-
-          # Extract Hamlib
           Expand-Archive -Path "C:\hamlib.zip" -DestinationPath "C:\hamlib-prefix"
 
-          # Install OmniRig
-          Expand-Archive -Path "C:\OmniRig.zip" -DestinationPath "C:\OmniRig"
+          # Install OmniRig from local deps folder
+          Expand-Archive -Path "wsjtx/deps/OmniRig.zip" -DestinationPath "C:\OmniRig"
           Start-Process -FilePath "C:\OmniRig\OmniRigSetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
 
-          # Install OmniRig INI files
-          Expand-Archive -Path "C:\RigIni.zip" -DestinationPath "C:\OmniRigIni"
+          # Install OmniRig INI files from local deps folder
+          Expand-Archive -Path "wsjtx/deps/RigIni.zip" -DestinationPath "C:\OmniRigIni"
           $omniRigRigsPath = "C:\Program Files (x86)\Afreet\OmniRig\Rigs"
           if (-not (Test-Path $omniRigRigsPath)) {
               New-Item -Path $omniRigRigsPath -ItemType Directory -Force
