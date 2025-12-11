@@ -57,18 +57,8 @@ if (CPACK_GENERATOR MATCHES "NSIS")
     skip_import:
   ")
 
-  # Variable for import path
-  set (CPACK_NSIS_EXTRA_DEFINES "Var IMPORT_PATH
-Var TXT_IMPORT_PATH
-VIProductVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
-VIFileVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
-VIAddVersionKey /LANG=0 \\\"ProductName\\\" \\\"@PROJECT_NAME@\\\"
-VIAddVersionKey /LANG=0 \\\"ProductVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"
-VIAddVersionKey /LANG=0 \\\"Comments\\\" \\\"@PROJECT_DESCRIPTION@\\\"
-VIAddVersionKey /LANG=0 \\\"CompanyName\\\" \\\"@PROJECT_VENDOR@\\\"
-VIAddVersionKey /LANG=0 \\\"LegalCopyright\\\" \\\"@PROJECT_COPYRIGHT@\\\"
-VIAddVersionKey /LANG=0 \\\"FileDescription\\\" \\\"@PROJECT_NAME@ Installer\\\"
-VIAddVersionKey /LANG=0 \\\"FileVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"")
+  # Variables for import path
+  set (CPACK_NSIS_EXTRA_DEFINES "Var IMPORT_PATH$\\nVar TXT_IMPORT_PATH")
 
   # Custom install options page - import WSJT-X settings with editable path
   set (CPACK_NSIS_EXTRA_INSTALL_OPTIONS "
