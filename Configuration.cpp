@@ -1663,10 +1663,14 @@ void Configuration::impl::read_settings ()
   my_grid_ = settings_->value ("MyGrid", QString {}).toString ();
   // Load canton and generate FD_exchange_ as "1A XX"
   QString swiss_canton = settings_->value ("Swiss_Canton", QString {"ZH"}).toString ();
+  // Find canton in dropdown, default to index 0 if not found
+  int canton_index = ui_->cbSwiss_Canton->findText(swiss_canton);
+  if (canton_index < 0) canton_index = 0;
+  ui_->cbSwiss_Canton->setCurrentIndex(canton_index);
+  swiss_canton = ui_->cbSwiss_Canton->currentText();  // Get actual selected text
   FD_exchange_ = "1A " + swiss_canton;
   RTTY_exchange_ = settings_->value ("RTTY_Exchange",QString {}).toString ();
   Contest_Name_ = settings_->value ("Contest_Name",QString {}).toString ();
-  ui_->cbSwiss_Canton->setCurrentText(swiss_canton);
   ui_->RTTY_Exchange->setText(RTTY_exchange_);
   ui_->Contest_Name->setText(Contest_Name_);
   hamlib_backed_up_ = settings_->value ("HamlibBackedUp",QString {}).toString ();
