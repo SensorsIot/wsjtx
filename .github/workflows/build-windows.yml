@@ -90,22 +90,11 @@ jobs:
           Copy-Item -Path "C:\OmniRigIni\*.ini" -Destination $omniRigRigsPath -Force
 
       - name: Restore build cache
-        if: ${{ !inputs.package_only }}
         id: cache-build
         uses: actions/cache/restore@v4
         with:
           path: wsjtx/build
-          key: wsjtx-build-${{ github.sha }}
-          restore-keys: |
-            wsjtx-build-
-
-      - name: Restore build from cache
-        if: ${{ inputs.package_only }}
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: wsjtx/build
-          key: wsjtx-build-
+          key: wsjtx-build-latest
           restore-keys: |
             wsjtx-build-
 
@@ -152,11 +141,11 @@ jobs:
           cmake --build . --target install --config Release
 
       - name: Save build cache
-        if: ${{ !inputs.package_only && steps.cache-build.outputs.cache-hit != 'true' }}
+        if: ${{ !inputs.package_only }}
         uses: actions/cache/save@v4
         with:
           path: wsjtx/build
-          key: wsjtx-build-${{ github.sha }}
+          key: wsjtx-build-${{ github.run_id }}
 
       - name: Create NSIS installer
         run: |
