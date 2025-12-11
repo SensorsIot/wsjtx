@@ -609,7 +609,7 @@ private:
   Q_SLOT void on_cbx4ToneSpacing_clicked(bool);
   Q_SLOT void on_prompt_to_log_check_box_clicked(bool);
   Q_SLOT void on_cbAutoLog_clicked(bool);
-  // Canton dropdown - no text edit slot needed (cbSwiss_Canton replaces Field_Day_Exchange)
+  Q_SLOT void on_Field_Day_Exchange_textEdited (QString const&);
   Q_SLOT void on_RTTY_Exchange_textEdited (QString const&);
   Q_SLOT void on_OTPUrl_textEdited (QString const&);
   Q_SLOT void on_OTPSeed_textEdited (QString const&);
@@ -1302,7 +1302,7 @@ Configuration::impl::impl (Configuration * self, QNetworkAccessManager * network
   ui_->callsign_line_edit->setValidator (new CallsignValidator {this});
   ui_->grid_line_edit->setValidator (new MaidenheadLocatorValidator {this});
   ui_->add_macro_line_edit->setValidator (new QRegularExpressionValidator {message_alphabet, this});
-  // Canton dropdown - no validator needed (cbSwiss_Canton replaces Field_Day_Exchange)
+  ui_->Field_Day_Exchange->setValidator (new QRegularExpressionValidator {field_day_exchange_re, this});
   ui_->RTTY_Exchange->setValidator (new QRegularExpressionValidator {RTTY_roundup_exchange_re, this});
   QRegularExpression b32(QString("(^[") + QString(BASE32_CHARSET)+QString(BASE32_CHARSET).toLower() + QString("]{16}$)|(^$)"));
   ui_->OTPSeed->setValidator(new QRegularExpressionValidator(b32, this));
@@ -1661,16 +1661,10 @@ void Configuration::impl::read_settings ()
 
   my_callsign_ = settings_->value ("MyCall", QString {}).toString ();
   my_grid_ = settings_->value ("MyGrid", QString {}).toString ();
-  // Load canton and generate FD_exchange_ as "1A XX"
-  QString swiss_canton = settings_->value ("Swiss_Canton", QString {"ZH"}).toString ();
-  // Find canton in dropdown, default to index 0 if not found
-  int canton_index = ui_->cbSwiss_Canton->findText(swiss_canton);
-  if (canton_index < 0) canton_index = 0;
-  ui_->cbSwiss_Canton->setCurrentIndex(canton_index);
-  swiss_canton = ui_->cbSwiss_Canton->currentText();  // Get actual selected text
-  FD_exchange_ = "1A " + swiss_canton;
+  FD_exchange_ = settings_->value ("Field_Day_Exchange",QString {}).toString ();
   RTTY_exchange_ = settings_->value ("RTTY_Exchange",QString {}).toString ();
   Contest_Name_ = settings_->value ("Contest_Name",QString {}).toString ();
+  ui_->Field_Day_Exchange->setText(FD_exchange_);
   ui_->RTTY_Exchange->setText(RTTY_exchange_);
   ui_->Contest_Name->setText(Contest_Name_);
   hamlib_backed_up_ = settings_->value ("HamlibBackedUp",QString {}).toString ();
@@ -1911,8 +1905,7 @@ void Configuration::impl::write_settings ()
 
   settings_->setValue ("MyCall", my_callsign_);
   settings_->setValue ("MyGrid", my_grid_);
-  // Save canton (extract from FD_exchange_ "1A XX" format)
-  settings_->setValue ("Swiss_Canton", FD_exchange_.right(2).trimmed());
+  settings_->setValue ("Field_Day_Exchange", FD_exchange_);
   settings_->setValue ("RTTY_Exchange", RTTY_exchange_);
   settings_->setValue ("Contest_Name", Contest_Name_);
   settings_->setValue ("Font", font_.toString ());
@@ -2191,8 +2184,14 @@ bool Configuration::impl::validate ()
       return false;
     }
 
-  // Canton dropdown always has valid selection - no validation needed
-  // (cbSwiss_Canton replaces Field_Day_Exchange text field)
+  if (ui_->rbField_Day->isEnabled () && ui_->rbField_Day->isChecked () &&
+      !ui_->Field_Day_Exchange->hasAcceptableInput ())
+    {
+      find_tab (ui_->Field_Day_Exchange);
+      MessageBox::critical_message (this, tr ("Invalid Contest Exchange")
+                                    , tr ("You must input a valid ARRL Field Day exchange"));
+      return false;
+    }
 
   if (ui_->rbRTTY_Roundup->isEnabled () && ui_->rbRTTY_Roundup->isChecked () &&
       !ui_->RTTY_Exchange->hasAcceptableInput ())
@@ -2378,8 +2377,7 @@ void Configuration::impl::accept ()
 
   my_callsign_ = ui_->callsign_line_edit->text ();
   my_grid_ = ui_->grid_line_edit->text ();
-  // Generate FD_exchange_ as "1A XX" from canton dropdown
-  FD_exchange_= "1A " + ui_->cbSwiss_Canton->currentText ();
+  FD_exchange_= ui_->Field_Day_Exchange->text ().toUpper ();
   RTTY_exchange_= ui_->RTTY_Exchange->text ().toUpper ();
   Contest_Name_= ui_->Contest_Name->text ().toUpper ();
   spot_to_psk_reporter_ = ui_->psk_reporter_check_box->isChecked ();
@@ -3309,10 +3307,10 @@ void Configuration::impl::check_visibility ()
 {
   if (ui_->rbField_Day->isChecked() and ui_->gbSpecialOpActivity->isChecked()) {
     ui_->labFD->setEnabled (true);
-    ui_->cbSwiss_Canton->setEnabled (true);
+    ui_->Field_Day_Exchange->setEnabled (true);
   } else {
     ui_->labFD->setEnabled (false);
-    ui_->cbSwiss_Canton->setEnabled (false);
+    ui_->Field_Day_Exchange->setEnabled (false);
   }
   if (ui_->rbRTTY_Roundup->isChecked() and ui_->gbSpecialOpActivity->isChecked()) {
     ui_->labRTTY->setEnabled (true);
@@ -3389,7 +3387,16 @@ void Configuration::impl::on_OTPSeed_textEdited (QString const& url){
     ui_->OTPSeed->setText(url.toUpper());
 }
 
-// Canton dropdown - no text edit handler needed (cbSwiss_Canton replaces Field_Day_Exchange)
+void Configuration::impl::on_Field_Day_Exchange_textEdited (QString const& exchange)
+{
+  auto text = exchange.simplified ().toUpper ();
+  auto class_pos = text.indexOf (QRegularExpression {R"([A-H])"});
+  if (class_pos >= 0 && text.size () >= class_pos + 2 && text.at (class_pos + 1) != QChar {' '})
+    {
+      text.insert (class_pos + 1, QChar {' '});
+    }
+  ui_->Field_Day_Exchange->setText (text);
+}
 
 void Configuration::impl::on_RTTY_Exchange_textEdited (QString const& exchange)
 {

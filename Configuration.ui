@@ -2944,18 +2944,18 @@ Right click for insert and delete options.</string>
               <item row="0" column="0">
                <widget class="QLabel" name="labFD">
                 <property name="accessibleName">
-                 <string>Canton selection</string>
+                 <string>Field Day exchange</string>
                 </property>
                 <property name="text">
-                 <string>Canton:</string>
+                 <string>Exch:</string>
                 </property>
                 <property name="buddy">
-                 <cstring>cbSwiss_Canton</cstring>
+                 <cstring>Field_Day_Exchange</cstring>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="cbSwiss_Canton">
+               <widget class="QLineEdit" name="Field_Day_Exchange">
                 <property name="minimumSize">
                  <size>
                   <width>70</width>
@@ -2963,138 +2963,14 @@ Right click for insert and delete options.</string>
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select your Swiss canton for the exchange.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Swiss XMAS exchange: 1A + canton code (e.g. 1A ZH).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>AG</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>AI</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>AR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>BE</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>BL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>BS</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>FR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>GE</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>GL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>GR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>JU</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>LU</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>NE</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>NW</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>OW</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SG</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SH</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SO</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SZ</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>TG</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>TI</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>UR</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>VD</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>VS</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>ZG</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>ZH</string>
-                 </property>
-                </item>
+                <property name="text">
+                 <string>6A SNJ</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
                </widget>
               </item>
              </layout>
@@ -3721,7 +3597,7 @@ Right click for insert and delete options.</string>
   <tabstop>gbSpecialOpActivity</tabstop>
   <tabstop>rbField_Day</tabstop>
   <tabstop>rbRTTY_Roundup</tabstop>
-  <tabstop>cbSwiss_Canton</tabstop>
+  <tabstop>Field_Day_Exchange</tabstop>
   <tabstop>RTTY_Exchange</tabstop>
  </tabstops>
  <resources/>
