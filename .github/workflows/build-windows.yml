@@ -106,16 +106,10 @@ jobs:
           cd wsjtx/build
           cpack -G NSIS
 
-      - name: Create ZIP archive
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem -Path "wsjtx/build/wsjtx-*.exe" | Select-Object -First 1
-          $zipName = $installer.BaseName + ".zip"
-          Compress-Archive -Path $installer.FullName -DestinationPath "wsjtx/build/$zipName"
-
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: wsjtx-swiss-installer
-          path: wsjtx/build/wsjtx-*.zip
+          path: wsjtx/build/wsjtx-*.exe
+          compression-level: 0
           retention-days: 30
