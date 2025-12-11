@@ -84,6 +84,12 @@ MyGrid=JN47
           Write-Host "Created test WSJT-X.ini at C:\wsjtx\WSJT-X.ini"
           Get-Content "C:\wsjtx\WSJT-X.ini"
 
+      - name: Use test CPack options
+        shell: pwsh
+        run: |
+          Copy-Item -Path "wsjtx/CMakeCPackOptions-nsis-test.cmake.in" -Destination "wsjtx/CMakeCPackOptions.cmake.in" -Force
+          Write-Host "Replaced CMakeCPackOptions.cmake.in with test version"
+
       - name: Configure WSJT-X
         run: |
           cd wsjtx

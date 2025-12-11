@@ -1,0 +1,191 @@
+# This file is configured at cmake time, and loaded at cpack time.
+# To pass variables to cpack from cmake, they must be configured
+# in this file.
+#
+# NOTE: This is the TEST version with the settings import page.
+# Used by build-nsis-test.yml workflow only.
+
+set (CPACK_PACKAGE_VENDOR "@PROJECT_VENDOR@")
+set (CPACK_PACKAGE_CONTACT "@PROJECT_CONTACT@")
+set (CPACK_RESOURCE_FILE_LICENSE "@PROJECT_SOURCE_DIR@/COPYING")
+set (CPACK_PACKAGE_INSTALL_DIRECTORY ".")
+set (CPACK_PACKAGE_EXECUTABLES wsjtx "@PROJECT_NAME@")
+set (CPACK_CREATE_DESKTOP_LINKS wsjtx)
+set (CPACK_STRIP_FILES TRUE)
+
+#
+# components
+#
+#set (CPACK_COMPONENTS_ALL runtime)
+#set (CPACK_COMPONENT_RUNTIME_DISPLAY_NAME "@PROJECT_NAME@ Application")
+#set (CPACK_COMPONENT_RUNTIME_DESCRIPTION "@WSJTX_DESCRIPTION_SUMMARY@")
+
+if (CPACK_GENERATOR MATCHES "NSIS")
+  set (CPACK_STRIP_FILES FALSE)	# breaks Qt packaging on Windows
+
+  set (CPACK_NSIS_INSTALL_ROOT "C:\\WSJTX-SWISS")
+
+  # set the install/unistall icon used for the installer itself
+  # There is a bug in NSI that does not handle full unix paths properly.
+  set (CPACK_NSIS_MUI_ICON "@PROJECT_SOURCE_DIR@/icons/windows-icons\\wsjtx.ico")
+  set (CPACK_NSIS_MUI_UNIICON "@PROJECT_SOURCE_DIR@/icons/windows-icons\\wsjtx.ico")
+  # set the package header icon for MUI
+  set (CPACK_PACKAGE_ICON "@PROJECT_SOURCE_DIR@/icons/windows-icons\\installer_logo.bmp")
+  # tell cpack to create links to the doc files
+  set (CPACK_NSIS_MENU_LINKS
+    "@PROJECT_MANUAL_DIRECTORY_URL@/@PROJECT_MANUAL@" "@PROJECT_NAME@ Documentation"
+    "@PROJECT_HOMEPAGE@" "@PROJECT_NAME@ Web Site"
+    )
+  # Use the icon from wsjtx for add-remove programs
+  set (CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\wsjtx.exe")
+
+  set (CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}")
+  set (CPACK_NSIS_HELP_LINK "@PROJECT_MANUAL_DIRECTORY_URL@/@PROJECT_MANUAL@")
+  set (CPACK_NSIS_URL_INFO_ABOUT "@PROJECT_HOMEPAGE@")
+  set (CPACK_NSIS_CONTACT "${CPACK_PACKAGE_CONTACT}")
+  set (CPACK_NSIS_MUI_FINISHPAGE_RUN "wsjtx.exe")
+  set (CPACK_NSIS_MODIFY_PATH ON)
+
+  # Extra uninstall commands to clean up old files
+  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+    Delete \\\"$INSTDIR\\\\bin\\\\libhamlib-4_old.dll\\\"
+  ")
+
+  # Variables for settings import page
+  set (CPACK_NSIS_EXTRA_DEFINES "${CPACK_NSIS_EXTRA_DEFINES}
+Var CB_IMPORT_SETTINGS
+Var IMPORT_SETTINGS
+Var WSJTX_SOURCE_PATH
+Var WSJTX_SOURCE_PATH_FIELD
+Var SHOW_IMPORT_PAGE
+")
+
+  # Initialize variables and check if import page should be shown
+  set (CPACK_NSIS_EXTRA_INIT_COMMANDS "
+    StrCpy $WSJTX_SOURCE_PATH \\\"C:\\\\wsjtx\\\"
+    StrCpy $IMPORT_SETTINGS \\\"1\\\"
+    StrCpy $SHOW_IMPORT_PAGE \\\"0\\\"
+    ; Check if WSJT-X.ini already exists in WSJT-SWISS folder
+    IfFileExists $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-X.ini +2 0
+      StrCpy $SHOW_IMPORT_PAGE \\\"1\\\"
+  ")
+
+  # Custom page definition (inserted into page sequence)
+  set (CPACK_NSIS_EXTRA_PAGES "
+Page custom ImportSettingsPage ImportSettingsPageLeave
+
+Function ImportSettingsPage
+  ; Skip this page if WSJT-X.ini already exists
+  StrCmp $SHOW_IMPORT_PAGE \\\"0\\\" 0 +2
+    Abort
+
+  !insertmacro MUI_HEADER_TEXT \\\"Import Settings\\\" \\\"Copy settings from an existing WSJT-X installation\\\"
+
+  nsDialogs::Create 1018
+  Pop $0
+  \\\${If} $0 == error
+    Abort
+  \\\${EndIf}
+
+  \\\${NSD_CreateCheckBox} 0u 0u 100% 10u \\\"Import settings from existing WSJT-X installation\\\"
+  Pop $CB_IMPORT_SETTINGS
+  \\\${NSD_SetState} $CB_IMPORT_SETTINGS \\\${BST_CHECKED}
+
+  \\\${NSD_CreateLabel} 0u 25u 100% 10u \\\"Source folder containing WSJT-X.ini:\\\"
+  Pop $0
+
+  \\\${NSD_CreateText} 0u 40u 80% 12u $WSJTX_SOURCE_PATH
+  Pop $WSJTX_SOURCE_PATH_FIELD
+
+  \\\${NSD_CreateBrowseButton} 82% 39u 18% 14u \\\"Browse...\\\"
+  Pop $0
+  \\\${NSD_OnClick} $0 OnBrowseSource
+
+  \\\${NSD_CreateLabel} 0u 65u 100% 20u \\\"This will copy your existing WSJT-X settings (callsign, grid, frequencies, etc.) to WSJT-SWISS.\\\"
+  Pop $0
+
+  nsDialogs::Show
+FunctionEnd
+
+Function ImportSettingsPageLeave
+  \\\${NSD_GetState} $CB_IMPORT_SETTINGS $IMPORT_SETTINGS
+  \\\${NSD_GetText} $WSJTX_SOURCE_PATH_FIELD $WSJTX_SOURCE_PATH
+FunctionEnd
+
+Function OnBrowseSource
+  nsDialogs::SelectFolderDialog \\\"Select WSJT-X settings folder\\\" $WSJTX_SOURCE_PATH
+  Pop $0
+  StrCmp $0 \\\"error\\\" +2 0
+    \\\${NSD_SetText} $WSJTX_SOURCE_PATH_FIELD $0
+FunctionEnd
+  ")
+
+  # Perform the actual import after installation
+  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+    ; Skip if user didn't want to import or page wasn't shown
+    StrCmp $SHOW_IMPORT_PAGE \\\"0\\\" skip_import
+    StrCmp $IMPORT_SETTINGS \\\"0\\\" skip_import
+
+    ; Check if source file exists
+    IfFileExists $WSJTX_SOURCE_PATH\\\\WSJT-X.ini 0 skip_import
+
+    ; Create destination directory and copy
+    CreateDirectory $LOCALAPPDATA\\\\WSJT-SWISS
+    CopyFiles /SILENT $WSJTX_SOURCE_PATH\\\\WSJT-X.ini $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-X.ini
+
+    skip_import:
+  ")
+
+  # Setup the installer and uninstall VersionInfo resource
+  set (CPACK_NSIS_EXTRA_DEFINES "${CPACK_NSIS_EXTRA_DEFINES}
+VIProductVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
+VIFileVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
+VIAddVersionKey /LANG=0 \\\"ProductName\\\" \\\"@PROJECT_NAME@\\\"
+VIAddVersionKey /LANG=0 \\\"ProductVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"
+VIAddVersionKey /LANG=0 \\\"Comments\\\" \\\"@PROJECT_DESCRIPTION@\\\"
+VIAddVersionKey /LANG=0 \\\"CompanyName\\\" \\\"@PROJECT_VENDOR@\\\"
+VIAddVersionKey /LANG=0 \\\"LegalCopyright\\\" \\\"@PROJECT_COPYRIGHT@\\\"
+VIAddVersionKey /LANG=0 \\\"FileDescription\\\" \\\"@PROJECT_NAME@ Installer\\\"
+VIAddVersionKey /LANG=0 \\\"FileVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"
+")
+endif ()
+
+if ("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
+  set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-pkg")
+  set (CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
+  set (CPACK_PACKAGING_INSTALL_PREFIX "/")
+endif ()
+
+if ("${CPACK_GENERATOR}" STREQUAL "DragNDrop")
+  set (CPACK_DMG_VOLUME_NAME "@PROJECT_BUNDLE_NAME@")
+  set (CPACK_DMG_BACKGROUND_IMAGE "@PROJECT_SOURCE_DIR@/icons/Darwin/DragNDrop Background.png")
+  set (CPACK_DMG_DS_STORE "@PROJECT_SOURCE_DIR@/Darwin/wsjtx_DMG.DS_Store")
+  set (CPACK_BUNDLE_NAME "@WSJTX_BUNDLE_NAME@")
+  set (CPACK_PACKAGE_ICON "@PROJECT_BINARY_DIR@/wsjtx.icns")
+  set (CPACK_BUNDLE_ICON "@PROJECT_BINARY_DIR@/wsjtx.icns")
+  set (CPACK_BUNDLE_STARTUP_COMMAND "@PROJECT_SOURCE_DIR@/Mac-wsjtx-startup.sh")
+endif ()
+
+if ("${CPACK_GENERATOR}" STREQUAL "WIX")
+  # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
+  # But the file names still use the full CMake_VERSION value:
+  set (CPACK_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME}-@wsjtx_VERSION@-${CPACK_SYSTEM_NAME}")
+  set (CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME}-@wsjtx_VERSION@-Source")
+
+  if (NOT CPACK_WIX_SIZEOF_VOID_P)
+    set (CPACK_WIX_SIZEOF_VOID_P "@CMAKE_SIZEOF_VOID_P@")
+  endif ()
+endif ()
+
+if ("${CPACK_GENERATOR}" STREQUAL "DEB")
+  set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
+  set (CPACK_COMPONENTS_ALL ${CPACK_COMPONENTS_ALL} Debian)
+endif ("${CPACK_GENERATOR}" STREQUAL "DEB")
+
+if ("${CPACK_GENERATOR}" STREQUAL "RPM")
+  set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.${CPACK_RPM_PACKAGE_ARCHITECTURE})
+endif ("${CPACK_GENERATOR}" STREQUAL "RPM")
+
+message (STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
