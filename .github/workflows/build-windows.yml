@@ -32,6 +32,7 @@ jobs:
           Set-MpPreference -DisableRealtimeMonitoring $true
 
       - name: Setup MSYS2 and dependencies
+        if: ${{ !inputs.package_only }}
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -55,7 +56,17 @@ jobs:
             mingw-w64-x86_64-portaudio
             mingw-w64-x86_64-nsis
 
+      - name: Setup MSYS2 (NSIS only)
+        if: ${{ inputs.package_only }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          cache: true
+          install: mingw-w64-x86_64-nsis
+
       - name: Download Hamlib and OmniRig
+        if: ${{ !inputs.package_only }}
         shell: pwsh
         run: |
           # Download files sequentially (parallel jobs unreliable in CI)
