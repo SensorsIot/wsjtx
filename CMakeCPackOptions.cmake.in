@@ -48,18 +48,54 @@ if (CPACK_GENERATOR MATCHES "NSIS")
     Delete \\\"$INSTDIR\\\\bin\\\\libhamlib-4_old.dll\\\"
   ")
 
-  # Setup the installer and uninstall VersionInfo resource
-  set (CPACK_NSIS_EXTRA_DEFINES
-    "VIProductVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
+  # Extra install commands to import WSJT-X settings
+  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+    ; Import WSJT-X settings if checkbox was checked
+    StrCmp $IMPORT_WSJTX_SETTINGS 1 0 skip_import
+      IfFileExists \\\"$LOCALAPPDATA\\\\WSJT-X\\\\WSJT-X.ini\\\" 0 skip_import
+        CreateDirectory \\\"$LOCALAPPDATA\\\\WSJT-SWISS\\\"
+        CopyFiles /SILENT \\\"$LOCALAPPDATA\\\\WSJT-X\\\\WSJT-X.ini\\\" \\\"$LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-SWISS.ini\\\"
+    skip_import:
+  ")
+
+  # Variable for import checkbox
+  set (CPACK_NSIS_EXTRA_DEFINES "
+Var IMPORT_WSJTX_SETTINGS
+VIProductVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
 VIFileVersion @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.@PROJECT_VERSION_TWEAK@
-VIAddVersionKey /LANG=0 \"ProductName\" \"@PROJECT_NAME@\"
-VIAddVersionKey /LANG=0 \"ProductVersion\" \"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\"
-VIAddVersionKey /LANG=0 \"Comments\" \"@PROJECT_DESCRIPTION@\"
-VIAddVersionKey /LANG=0 \"CompanyName\" \"@PROJECT_VENDOR@\"
-VIAddVersionKey /LANG=0 \"LegalCopyright\" \"@PROJECT_COPYRIGHT@\"
-VIAddVersionKey /LANG=0 \"FileDescription\" \"@PROJECT_NAME@ Installer\"
-VIAddVersionKey /LANG=0 \"FileVersion\" \"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\""
-    )
+VIAddVersionKey /LANG=0 \\\"ProductName\\\" \\\"@PROJECT_NAME@\\\"
+VIAddVersionKey /LANG=0 \\\"ProductVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"
+VIAddVersionKey /LANG=0 \\\"Comments\\\" \\\"@PROJECT_DESCRIPTION@\\\"
+VIAddVersionKey /LANG=0 \\\"CompanyName\\\" \\\"@PROJECT_VENDOR@\\\"
+VIAddVersionKey /LANG=0 \\\"LegalCopyright\\\" \\\"@PROJECT_COPYRIGHT@\\\"
+VIAddVersionKey /LANG=0 \\\"FileDescription\\\" \\\"@PROJECT_NAME@ Installer\\\"
+VIAddVersionKey /LANG=0 \\\"FileVersion\\\" \\\"v@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@BUILD_TYPE_REVISION@\\\"
+  ")
+
+  # Custom install options page content
+  set (CPACK_NSIS_EXTRA_INSTALL_OPTIONS "
+    \\\${NSD_CreateGroupBox} 0u 70u 100% 80u \\\"Import Settings from WSJT-X\\\"
+    Pop $0
+    \\\${NSD_CreateLabel} 10u 85u 280u 30u \\\"WSJT-SWISS can import your existing WSJT-X settings (callsign, grid, audio devices, rig configuration).\\\"
+    Pop $0
+    \\\${NSD_CreateCheckBox} 10u 120u 280u 15u \\\"Import settings from WSJT-X (overwrites existing WSJT-SWISS settings)\\\"
+    Pop $1
+    ; Check if WSJT-X.ini exists
+    IfFileExists \\\"$LOCALAPPDATA\\\\WSJT-X\\\\WSJT-X.ini\\\" 0 no_wsjtx_ini
+      \\\${NSD_SetState} $1 \\\${BST_CHECKED}
+      StrCpy $IMPORT_WSJTX_SETTINGS 1
+      Goto done_wsjtx_check
+    no_wsjtx_ini:
+      EnableWindow $1 0
+      \\\${NSD_CreateLabel} 10u 138u 280u 10u \\\"(WSJT-X settings not found)\\\"
+      Pop $0
+      StrCpy $IMPORT_WSJTX_SETTINGS 0
+    done_wsjtx_check:
+  ")
+
+  set (CPACK_NSIS_EXTRA_INSTALL_OPTIONS_READ "
+    \\\${NSD_GetState} $1 $IMPORT_WSJTX_SETTINGS
+  ")
 endif ()
 
 if ("${CPACK_GENERATOR}" STREQUAL "PackageMaker")

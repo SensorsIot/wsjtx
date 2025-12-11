@@ -7756,7 +7756,7 @@ void MainWindow::on_actionFT8_triggered()
     QString t0="";
     if(SpecOp::NA_VHF==m_specOp) t0="NA VHF";
     if(SpecOp::EU_VHF==m_specOp) t0="EU VHF";
-    if(SpecOp::FIELD_DAY==m_specOp) t0="Field Day";
+    if(SpecOp::FIELD_DAY==m_specOp) t0="Swiss XMAS";
     if(SpecOp::RTTY==m_specOp) t0="FT RU";
     if(SpecOp::WW_DIGI==m_specOp) t0="WW Digi";
     if(SpecOp::ARRL_DIGI==m_specOp) t0="ARRL Digi";
@@ -8033,7 +8033,7 @@ void MainWindow::on_actionQ65_triggered()
     QString t0="";
     if(SpecOp::NA_VHF==m_specOp) t0="NA VHF";
     if(SpecOp::EU_VHF==m_specOp) t0="EU VHF";
-    if(SpecOp::FIELD_DAY==m_specOp) t0="Field Day";
+    if(SpecOp::FIELD_DAY==m_specOp) t0="Swiss XMAS";
     if(SpecOp::RTTY==m_specOp) t0="FT RU";
     if(SpecOp::WW_DIGI==m_specOp) t0="WW Digi";
     if(SpecOp::ARRL_DIGI==m_specOp) t0="ARRL Digi";
@@ -11470,7 +11470,7 @@ void MainWindow::chkFT4()
     QString t0="";
     if(SpecOp::NA_VHF==m_specOp) t0="NA VHF";
     if(SpecOp::EU_VHF==m_specOp) t0="EU VHF";
-    if(SpecOp::FIELD_DAY==m_specOp) t0="Field Day";
+    if(SpecOp::FIELD_DAY==m_specOp) t0="Swiss XMAS";
     if(SpecOp::RTTY==m_specOp) t0="FT RU";
     if(SpecOp::WW_DIGI==m_specOp) t0="WW Digi";
     if(SpecOp::ARRL_DIGI==m_specOp) t0="ARRL Digi";
