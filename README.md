@@ -11,7 +11,7 @@
 
 WSJT-SWISS is a fork of [WSJT-X](https://wsjt.sourceforge.io/wsjtx.html) designed for the **Swiss FT8 Contest**. It enables amateur radio operators to exchange Swiss canton codes as part of the FT8 digital mode protocol.
 
-**Eine deutsche Anleitung findet sich hier:** [Deutsche Anleitung](doc/Anleitung Deutsch.md)
+**Eine deutsche Anleitung findet sich hier:** ![Deutsche Anleitung](doc/Anleitung Deutsch.md)
 
 ### Canton Exchange Protocol
 
