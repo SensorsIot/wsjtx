@@ -100,7 +100,7 @@ jobs:
       - name: Create NSIS installer
         run: |
           cd wsjtx/build
-          cpack -G NSIS
+          cpack -G NSIS || (cat _CPack_Packages/win64/NSIS/NSISOutput.log && exit 1)
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
