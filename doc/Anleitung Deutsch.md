@@ -6,6 +6,8 @@
 
 ## ***Diese Software wird unabhängig von eurer WSJT-X Software installiert. Sie kann durch einfaches Löschen des Verzeichnisses C:\WSJTX-SWISS wieder entfernt werden. Sie sollte die Einstellungen von eurem Standard WSJT-X übernehmen***
 
+## */P oder /M etc. wie auch 4 stellige Rufzeichen wie HB9HSLU funktionieren nicht*
+
 ## 1. Zweck von WSJT-SWISS
 
 WSJT-SWISS ist ein Fork von [WSJT-X](https://wsjt.sourceforge.io/wsjtx.html), der für den **Swiss XMAS FT8 Contest** entwickelt wurde. Er ermöglicht es Funkamateuren, Schweizer Kantonskürzel als Bestandteil des FT8-Digitalmode-Protokolls auszutauschen.
