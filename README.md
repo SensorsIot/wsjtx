@@ -142,8 +142,8 @@ Completed QSOs are logged automatically with:
 - Standard FT8 fields (callsign, time, frequency, mode, signal reports)
 - Canton fields (`MY_CANTON`, `HIS_CANTON`)
 
-Export your log via **File** → **Export ADIF** for contest submission.
-
+As usual with WSJT-X, you can export the contest log into a Cabrillo format to upload to https://contestlog.uska.ch/submit
+![Operation Screenshot](doc/images/Cabrillo-screenshot.png)
 ---
 
 ## 7. Compatibility
