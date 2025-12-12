@@ -49,12 +49,33 @@ if (CPACK_GENERATOR MATCHES "NSIS")
   ")
 
   # Import settings from WSJT-X if no WSJT-SWISS config exists
-  # Logic: Only copy if WSJT-SWISS.ini does NOT exist and WSJT-X.ini DOES exist
+  # Shows MessageBox asking user if they want to import, with option to select source folder
   set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-    IfFileExists $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-SWISS.ini skip_import
-      IfFileExists C:\\\\wsjtx\\\\WSJT-X.ini 0 skip_import
-        CreateDirectory $LOCALAPPDATA\\\\WSJT-SWISS
-        CopyFiles /SILENT C:\\\\wsjtx\\\\WSJT-X.ini $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-SWISS.ini
+    ; Check if WSJT-X.ini already exists in WSJT-SWISS folder
+    IfFileExists $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-X.ini skip_import
+
+    ; Ask user if they want to import settings
+    MessageBox MB_YESNO|MB_ICONQUESTION `Do you want to import settings from an existing WSJT-X installation?` IDNO skip_import
+
+    ; Let user select source folder
+    nsDialogs::SelectFolderDialog `Select folder containing WSJT-X.ini` `C:\\\\wsjtx`
+    Pop $0
+
+    ; Check if user cancelled
+    StrCmp $0 `error` skip_import
+
+    ; Check if WSJT-X.ini exists in selected folder
+    IfFileExists $0\\\\WSJT-X.ini 0 source_not_found
+
+    ; Create destination directory and copy
+    CreateDirectory $LOCALAPPDATA\\\\WSJT-SWISS
+    CopyFiles /SILENT $0\\\\WSJT-X.ini $LOCALAPPDATA\\\\WSJT-SWISS\\\\WSJT-X.ini
+    MessageBox MB_OK|MB_ICONINFORMATION `Settings imported successfully!`
+    Goto skip_import
+
+    source_not_found:
+    MessageBox MB_OK|MB_ICONWARNING `WSJT-X.ini not found in selected folder`
+
     skip_import:
   ")
 
