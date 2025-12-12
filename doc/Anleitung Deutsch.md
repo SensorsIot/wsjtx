@@ -162,7 +162,7 @@ Der Score wird dann von der USKA berechnet. Deshalb kann er auch mit 0 ausgefül
 
 Beim Upload Christmas Contest Digital 2 2025 auswählen und folgende Kategorie eintragen:
 
-![Cabrillo3.screenshot](images/Cabrillo3-screenshot.png)
+![Cabrillo3.screenshot](images/Cabrillo3.screenshot.png)
 
 
 
