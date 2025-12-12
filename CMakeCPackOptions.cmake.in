@@ -45,7 +45,7 @@ if (CPACK_GENERATOR MATCHES "NSIS")
 
   # Extra uninstall commands to clean up old files
   set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-    Delete \\\"$INSTDIR\\\\bin\\\\libhamlib-4_old.dll\\\"
+    Delete \\\"C:\\\\WSJTX-SWISS\\\\wsjtx\\\\bin\\\\libhamlib-4_old.dll\\\"
   ")
 
   # Import settings from WSJT-X if no WSJT-SWISS config exists
