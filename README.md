@@ -11,6 +11,8 @@
 
 WSJT-SWISS is a fork of [WSJT-X](https://wsjt.sourceforge.io/wsjtx.html) designed for the **Swiss FT8 Contest**. It enables amateur radio operators to exchange Swiss canton codes as part of the FT8 digital mode protocol.
 
+**Eine deutsche Anleitung findet sich hier:** https://github.com/SensorsIot/wsjtx-swiss/blob/master/doc/Anleitung%20Deutsch.md
+
 ### Canton Exchange Protocol
 
 WSJT-SWISS uses a custom FT8 message type (i3=0, n3=7) to encode canton information in the 77-bit message structure. During a contest QSO, stations exchange their two-letter canton codes (e.g., ZH for Zürich, BE for Bern) instead of the standard grid locator.
@@ -66,14 +68,6 @@ Your browser or antivirus software may block the download because the file is no
 1. Extract `wsjtx-swiss-installer.zip`
 2. Run `wsjtx-swiss-installer.exe`
 
-### Automatic Settings Import
-
-On first install, WSJT-SWISS automatically imports your settings from WSJT-X if:
-- No existing WSJT-SWISS configuration is found
-- A WSJT-X configuration exists at `C:\wsjtx\WSJT-X.ini`
-
-This copies your callsign, grid, audio settings, and rig configuration. Your existing WSJT-SWISS settings are never overwritten.
-
 ### Microsoft SmartScreen Warning
 
 Windows may show a SmartScreen warning because the application is not signed with a commercial code signing certificate.
@@ -113,6 +107,7 @@ After installation, you can start WSJT-SWISS in several ways:
 6. Click **OK** to save
 7. Add XMAS in the "Contest name"
    
+
 ![Setup Screenshot](doc/images/setup-screenshot.png)
 
 Your TX messages will now automatically include your canton code during contest operation and you CQ "XMAS".
