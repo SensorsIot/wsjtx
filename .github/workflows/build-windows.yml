@@ -110,3 +110,11 @@ jobs:
           name: wsjtx-swiss-installer
           path: wsjtx/build/wsjtx-*.exe
           retention-days: 30
+
+      - name: Upload NSIS debug files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nsis-debug
+          path: wsjtx/build/_CPack_Packages/win64/NSIS/
+          retention-days: 7
