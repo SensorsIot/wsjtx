@@ -158,7 +158,13 @@ Vor dem Upload müssen die Felder nach dem folgenden Beispiel ausgefüllt werden
 
 ![Cabrillo2-screenshot](D:\Github\wsjtx-swiss\doc\Cabrillo2-screenshot.png)
 
-Der Score wird dann von der USKA berechnet. Deshalb kann er auch mit 0 ausgefüllt werden.
+Der Score wird dann von der USKA berechnet. Deshalb kann er auch mit 0 ausgefüllt werden. 
+
+Beim Upload Christmas Contest Digital 2 2025 auswählen und folgende Kategorie eintragen:
+
+![Cabrillo3.screenshot](C:\Users\AndreasSpiess\Downloads\Cabrillo3.screenshot.png)
+
+
 
 ---
 
